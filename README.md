@@ -12,7 +12,7 @@ A Baldi's Basics Plus mod that self-inserts four new events into the game, with 
 - Helped for an information of a transpiler opcode.
 * ### MissingTextureMan(/Meow)101
 - Suggested Traffic Trouble cars exploding when colliding with frozen NPCs.
-- Made the API that this mod was dependent to.
+- Made the API that this mod is dependent to.
 - Made Level Loader and Level Studio, which the mod has compatability with.
 
 # Content Notice
