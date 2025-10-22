@@ -15,7 +15,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using UnityEngine;
-using static MonoMod.RuntimeDetour.DynamicHookGen;
 
 namespace ABWEvents.LevelStudio;
 
@@ -205,11 +204,12 @@ internal class TrafficTroubleTunnelTool : PlaceAndRotateTool // Workaround: Is a
 
     public override bool ValidLocation(IntVector2 position)
     {
-        if (!base.ValidLocation(position))
-            return false;
-        for (int i = 0; i < 4; i++)
-            if (EditorController.Instance.levelData.WallFree(position, (Direction)i, false) && EditorController.Instance.levelData.GetCellSafe(position + ((Direction)i).ToIntVector2())?.roomId == 0)
-                return true;
+        if (base.ValidLocation(position))
+        {
+            for (int i = 0; i < 4; i++)
+                if (EditorController.Instance.levelData.WallFree(position, (Direction)i, false) && EditorController.Instance.levelData.GetCellSafe(position + ((Direction)i).ToIntVector2())?.roomId == 0)
+                    return true;
+        }
         return false;
     }
 }
