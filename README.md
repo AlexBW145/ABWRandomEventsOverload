@@ -16,4 +16,4 @@ A Baldi's Basics Plus mod that self-inserts four new events into the game, with 
 - Made Level Loader and Level Studio, which the mod has compatability with.
 
 # Content Notice
-*This mod contains events that were originated and belonged to different video games and is not responsible for the damage that caused towards Baldi's super schoolhouse.*
+*This mod contains events that originated and belonged to different video games and is not responsible for the damage that caused towards Baldi's super schoolhouse.*
