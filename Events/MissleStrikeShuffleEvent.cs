@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using static UnityEngine.ParticleSystem.PlaybackState;
 
 namespace ABWEvents.Events;
 
@@ -60,6 +61,7 @@ public class MissleStrikeShuffleGuy : NPC
     public override void Initialize()
     {
         base.Initialize();
+        ClearSoundLocations();
         overrider = new EntityOverrider();
         navigator.Entity.Override(overrider);
         overrider.SetHeight(55f);
@@ -82,6 +84,7 @@ public class MissleStrikeShuffleGuy : NPC
     private IEnumerator Spin()
     {
         isSpin = true;
+        bool playWasInvisible = ec.Players[0].Invisible;
         behaviorStateMachine.ChangeNavigationState(new NavigationState_DoNothing(this, 9, true));
         transform.rotation = Quaternion.LookRotation((ec.Players[0].transform.position - transform.position).normalized, Vector3.up);
         Vector3 vector = default;
@@ -95,7 +98,7 @@ public class MissleStrikeShuffleGuy : NPC
         }
         spintime = 1f;
         var rocket = Instantiate(rocketPre);
-        rocket.transform.position = transform.position + Vector3.up * 60f;
+        rocket.transform.position = transform.position + (Vector3.up * 55f);
         float leftovers = 0f; // Why is lerp always be clamped at the range of 0 to 1?
         while (spintime > 0f)
         {
@@ -105,17 +108,31 @@ public class MissleStrikeShuffleGuy : NPC
             vector = Vector3.RotateTowards(transform.forward, (ec.Players[0].transform.position - transform.position).normalized, (Time.deltaTime * ec.NpcTimeScale) * 2f * (float)Math.PI * 3f, 0f);
             if (vector != Vector3.zero)
                 transform.rotation = Quaternion.LookRotation(vector, Vector3.up);
-            rocket.transform.position = Vector3.Lerp(transform.position + Vector3.up * 60f, transform.position + Vector3.up * 199f, leftovers / 1f);
+            rocket.transform.position = Vector3.Lerp(transform.position + (Vector3.up * 55f), transform.position + Vector3.up * 199f, leftovers / 1f);
             yield return null;
         }
         var cells = ec.Players[0].plm.Entity.CurrentRoom?.cells.Where(x => !x.Null && (x.CenterWorldPosition - ec.Players[0].transform.position).magnitude < (10f * 5f) * Mathf.Max(1f, Mathf.RoundToInt(times / 6f))).ToList();
-        if (cells != null && cells.Count > 0)
+        if (!playWasInvisible && cells != null && cells.Count > 0)
         {
-            List<Vector3> targets = new List<Vector3>();
-            for (int i = 0; i < Mathf.Min(times, cells.Count); i++)
+            List<Vector3> targets = new List<Vector3>(sounds.Where(x => x != Vector3.zero));
+            for (int i = targets.Count - 1; i >= 0; i--)
+                if (i >= times)
+                    targets.RemoveAt(i);
+            if (ec.Players[0].Invisible)
+                cells.Clear();
+            for (int i = targets.Count; i < Mathf.Min(times, cells.Count); i++)
                 targets.Add(cells[Mathf.RoundToInt(UnityEngine.Random.Range(0f, cells.Count - 1))].FloorWorldPosition);
             FireInTheHole([.. targets]);
         }
+        else if (sounds.Any(x => x != Vector3.zero))
+        {
+            List<Vector3> targets = new List<Vector3>(sounds.Where(x => x != Vector3.zero));
+            for (int i = targets.Count - 1; i >= 0; i--)
+                if (i >= times)
+                    targets.RemoveAt(i);
+            FireInTheHole([.. targets]);
+        }
+        ClearSoundLocations();
         overrider.SetHeight(55f);
         Destroy(rocket);
         spintime = 4f;
@@ -132,10 +149,25 @@ public class MissleStrikeShuffleGuy : NPC
     private bool isSpin;
     public void Spinny()
     {
-        if (ec.Players[0].Invisible)
+        if (ec.Players[0].Invisible && !sounds.Any(x => x != Vector3.zero))
             behaviorStateMachine.ChangeNavigationState(new NavigationState_TargetPosition(this, 9, new Vector3(UnityEngine.Random.Range(home.x - 20f, home.x + 20f), transform.position.y, UnityEngine.Random.Range(home.z - 20f, home.z + 20f))));
         else
             StartCoroutine(Spin());
+    }
+
+    private Vector3[] sounds = new Vector3[128]; // Stealth only challenge?? Nah, don't make a sound challenge.
+    public override void Hear(GameObject source, Vector3 position, int value)
+    {
+        base.Hear(source, position, value);
+        if (value > 10 && ec.Players[0].Invisible) // Cannot be above door's default noise value
+            sounds[value] = position + (Vector3.down * position.y);
+
+    }
+
+    public void ClearSoundLocations()
+    {
+        for (int i = 0; i < sounds.Length; i++)
+            sounds[i] = Vector3.zero;
     }
 
     protected override void VirtualUpdate()
@@ -165,6 +197,12 @@ public class MissleStrikeShuffleGuy_StateBase : NpcState
         guy.Spinny();
     }
 
+    public override void PlayerInSight(PlayerManager player)
+    {
+        base.PlayerInSight(player);
+        guy.ClearSoundLocations();
+    }
+
     public override void DoorHit(StandardDoor door)
     {
     }
@@ -180,11 +218,11 @@ public class MissleStrikeImpact : MonoBehaviour
 
     private Fog fog = new Fog()
     {
-        color = Color.blue,
+        color = new Color(1f, 0.2f, 0f),
         priority = 99,
         startDist = 10,
         maxDist = 25,
-        strength = 5
+        strength = 15
     };
 
     public void Initialize(EnvironmentController ec)
@@ -199,7 +237,7 @@ public class MissleStrikeImpact : MonoBehaviour
         if (Active)
         {
             if (indication.activeSelf)
-                indication.transform.localRotation = Quaternion.Euler(indication.transform.localRotation.eulerAngles + ((Vector3.up * 60f) * (Time.deltaTime * ec.EnvironmentTimeScale)));
+                indication.transform.localRotation = Quaternion.Euler(indication.transform.localRotation.eulerAngles + ((Vector3.down * 210f) * (Time.deltaTime * ec.EnvironmentTimeScale)));
             else if (impact.activeSelf)
                 impact.transform.localRotation = Quaternion.Euler(impact.transform.localRotation.eulerAngles + ((Vector3.up * 90f) * (Time.deltaTime * ec.EnvironmentTimeScale)));
         }
@@ -209,7 +247,7 @@ public class MissleStrikeImpact : MonoBehaviour
     {
         var trigger = GetComponent<Collider>();
         trigger.enabled = false;
-        float time = 0.9f; 
+        float time = 0.9f;
         while (time > 0f)
         {
             time -= Time.deltaTime * ec.EnvironmentTimeScale;
@@ -231,7 +269,7 @@ public class MissleStrikeImpact : MonoBehaviour
         {
             time -= Time.deltaTime * ec.EnvironmentTimeScale;
             leftovers += Time.deltaTime * ec.EnvironmentTimeScale;
-            rocket.transform.localPosition = Vector3.Lerp(Vector3.up * 199f, Vector3.down * 10f, leftovers / 0.5f);
+            rocket.transform.localPosition = Vector3.Lerp(Vector3.up * 199f, Vector3.down, leftovers / 0.5f);
             yield return null;
         }
         indication.SetActive(false);
@@ -274,16 +312,10 @@ public class MissleStrikeImpact : MonoBehaviour
 
     private static LayerMask triggerLayerMask = 5191680;
 
-    private void OnCollisionEnter(Collision collision)
-    {
-        if (collision.gameObject.CompareTag("Window"))
-            collision.gameObject.GetComponent<Window>()?.Break(true);
-        else if (collision.gameObject.GetComponent<Door>() != null)
-            collision.gameObject.GetComponent<Door>()?.OpenTimed(5f, false);
-    }
-
     private void OnTriggerEnter(Collider other)
     {
+        if (other.CompareTag("Window")) // Ignore Raycast B does not collide with windows, which can piss me off and confuse me sometimes.
+            other.GetComponent<Window>()?.Break(true);
         if (((1 << other.gameObject.layer) & (int)triggerLayerMask) == 0)
             return;
         if (other.CompareTag("Player"))
@@ -302,6 +334,8 @@ public class MissleStrikeImpact : MonoBehaviour
 
     private void OnTriggerStay(Collider other)
     {
+        if (other.CompareTag("StandardDoor")) // Ignore Raycast B does not collide with doors, which can piss me off and confuse me sometimes.
+            other.GetComponent<StandardDoor>()?.OpenTimed(5f, false);
         if (((1 << other.gameObject.layer) & (int)triggerLayerMask) == 0)
             return;
         if (MissleStrikeShuffleEvent.Instance.isMode && other.CompareTag("Player"))

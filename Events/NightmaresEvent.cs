@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -204,7 +205,8 @@ public class NightmareFissures : MonoBehaviour
         while (leftovers <= time)
         {
             leftovers += Time.deltaTime * ec.EnvironmentTimeScale;
-            gobj.transform.localScale = Vector3.Lerp(ogscale, scale, leftovers / time);
+            float actualDuration = leftovers / time;
+            gobj.transform.localScale = Vector3.Lerp(ogscale, scale, Mathf.Pow(2f, -10f * actualDuration) * Mathf.Sin((actualDuration * 10 - 0.75f) * ((2f * Mathf.PI) / 3f)) + 1); // Tweening to the max??
             yield return null;
         }
         yield break;

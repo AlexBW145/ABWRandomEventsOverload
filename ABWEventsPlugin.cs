@@ -113,6 +113,16 @@ This is actually an early access release...", false);
                 { "Vfx_ABW_Nightmares", "VEhFIE5JR0hUTUFSRVMgQVJFIENPTUlORy4=" },
                 { "Vfx_ABW_Nightmares1", "SXMgdGhpcyBldmVuIHBhcnQgb2YgdGhlIHNjcmlwdD8=" },
 
+                { "Vfx_ABW_MissleShuffleStrike", "Uh noes, we have sighted a random UFO and is now sending missle strikes towards the schoolhouse?!" },
+                { "Vfx_ABW_MissleShuffleStrike1", "Avoid them or else you'll get pushed away!" },
+
+                { "Vfx_ABW_BonusMysteryEvent", "Hmm... A mystery event has appeared." },
+                { "Vfx_ABW_BonusMysteryEvent1", "I wonder what action will it throw towards you?" },
+
+                { "Vfx_ABW_TokenOutrun", "Some random thief has stolen all of the banks containing You Thought Points!" },
+                { "Vfx_ABW_TokenOutrun1", "But they're accidentally dropping some," },
+                { "Vfx_ABW_TokenOutrun2", "grab them before its too late!" },
+
                 { "Ed_GlobalPage_CrazyEvents", "<color=#FF0200>C</color><color=#26FF2B>R</color><color=#2412FB>A</color><color=#FEFE2B>Z</color><color=#D987FF>Y</color>\nEvents" },
                 { "Ed_GlobalPage_BonusEvents", "Bonus\nEvents" },
 
@@ -163,6 +173,9 @@ This is actually an early access release...", false);
             ObjectCreators.CreateSoundObject(AssetLoader.AudioClipFromMod(this, "AudioClip", "Intros", "TrafficTroubleIntro.wav"), "Vfx_ABW_TrafficTrouble", SoundType.Voice, him),
             ObjectCreators.CreateSoundObject(AssetLoader.AudioClipFromMod(this, "AudioClip", "Intros", "TrafficTroubleHyperIntro.wav"), "Vfx_ABW_HyperTrafficTrouble", SoundType.Voice, him),
             ObjectCreators.CreateSoundObject(AssetLoader.AudioClipFromMod(this, "AudioClip", "Intros", "NightmaresIntro.wav"), "Vfx_ABW_Nightmares", SoundType.Voice, new Color(0.01568627451f, 0.04705882353f, 0.0862745098f)),
+            ObjectCreators.CreateSoundObject(AssetLoader.AudioClipFromMod(this, "AudioClip", "Intros", "MissleStrikeShuffleIntro.wav"), "Vfx_ABW_MissleShuffleStrike", SoundType.Voice, him),
+            ObjectCreators.CreateSoundObject(AssetLoader.AudioClipFromMod(this, "AudioClip", "Intros", "MysteryEventIntro.wav"), "Vfx_ABW_BonusMysteryEvent", SoundType.Voice, him),
+            ObjectCreators.CreateSoundObject(AssetLoader.AudioClipFromMod(this, "AudioClip", "Intros", "TokenOutrunIntro.wav"), "Vfx_ABW_TokenOutrun", SoundType.Voice, him),
 
             ObjectCreators.CreateSoundObject(AssetLoader.AudioClipFromMod(this, "AudioClip", "GnatSwarm", "GnatIdling.wav"), "Sfx_GnatIdling", SoundType.Effect, Color.white),
             ObjectCreators.CreateSoundObject(AssetLoader.AudioClipFromMod(this, "AudioClip", "GnatSwarm", "Gnattack.wav"), "Sfx_Gnattack", SoundType.Effect, Color.white),
@@ -190,6 +203,9 @@ This is actually an early access release...", false);
                 "EventIntros/TrafficTrouble",
                 "EventIntros/HyperTrafficTrouble",
                 "EventIntros/Nightmares",
+                "EventIntros/MissleStrikeShuffle",
+                "EventIntros/BonusRandomEvent",
+                "EventIntros/TokenOutrun",
 
                 "GnatSwarm/Gnat",
                 "GnatSwarm/Gnattack",
@@ -271,6 +287,32 @@ This is actually an early access release...", false);
                 key = "Vfx_ABW_Nightmares1"
             },
             ];
+        assets.Get<SoundObject>("EventIntros/MissleStrikeShuffle").additionalKeys = [
+            new()
+            {
+                time = 5.22f,
+                key = "Vfx_ABW_MissleShuffleStrike1"
+            }
+            ];
+        assets.Get<SoundObject>("EventIntros/BonusRandomEvent").additionalKeys = [
+            new()
+            {
+                time = 2.85f,
+                key = "Vfx_ABW_BonusMysteryEvent1"
+            }
+            ];
+        assets.Get<SoundObject>("EventIntros/TokenOutrun").additionalKeys = [
+            new()
+            {
+                time = 4.38f,
+                key = "Vfx_ABW_TokenOutrun1"
+            },
+            new()
+            {
+                time = 6.35f,
+                key = "Vfx_ABW_TokenOutrun2"
+            }
+            ];
         assets.AddRange<Texture2D>([
             AssetLoader.TextureFromMod(this, "Texture2D", "TrafficTrouble", "Open.png"),
             AssetLoader.TextureFromMod(this, "Texture2D", "TrafficTrouble", "Corner.png"),
@@ -280,12 +322,24 @@ This is actually an early access release...", false);
             AssetLoader.TextureFromMod(this, "Texture2D", "TrafficTrouble", "TrafficTunnel.png"),
             AssetLoader.TextureFromMod(this, "Texture2D", "TrafficTrouble", "TrafficTunnelMask.png"),
 
-            AssetLoader.TextureFromMod(this, "Texture2D", "Nightmares", "Fissure.png")
+            AssetLoader.TextureFromMod(this, "Texture2D", "Nightmares", "Fissure.png"),
+
+            AssetLoader.TextureFromMod(this, "Texture2D", "MissleStrikeShuffle", "MissleShuffleFlames.png"),
+            AssetLoader.TextureFromMod(this, "Texture2D", "MissleStrikeShuffle", "MissleShuffleIndication.png")
         ], ["TrafficTrouble/Roads/Open", "TrafficTrouble/Roads/Corner", "TrafficTrouble/Roads/Straight", "TrafficTrouble/Roads/ThreeWay", "TrafficTrouble/Roads/End",
         "TrafficTrouble/Tunnel", "TrafficTrouble/TunnelMask",
         
-        "Nightmares/Fissure"]);
-        assets.Add("Nightmares/FissureGlow", AssetLoader.SpriteFromMod(this, Vector2.one/2f, 64f, "Texture2D", "Nightmares", "FissureGlow.png"));
+        "Nightmares/Fissure",
+
+        "MissleShuffleStrike/Flames",
+        "MissleShuffleStrike/Indication"]);
+        assets.AddRange([
+            AssetLoader.SpriteFromMod(this, Vector2.one/2f, 64f, "Texture2D", "Nightmares", "FissureGlow.png"),
+            AssetLoader.SpriteFromMod(this, Vector2.one/2f, 16f, "Texture2D", "MissleStrikeShuffle", "ARocketThatStartsWithR.png")
+            ], [
+                "Nightmares/FissureGlow",
+                "MissleShuffleStrike/Rocket"
+                ]);
         List<SoundObject> sounds = new List<SoundObject>();
         foreach (var sound in Directory.GetFiles(Path.Combine(AssetLoader.GetModPath(this), "AudioClip", "TrafficTrouble", "Horns"), "*.wav"))
         {
@@ -720,14 +774,14 @@ This is actually an early access release...", false);
             .SetName("Event_MissleStrikeShuffle")
             .SetEnum("MissleStrikeShuffle")
             .SetJingle(abwJingle)
-            .SetSound(Resources.FindObjectsOfTypeAll<SoundObject>().Last(x => x.name == "DrR_SessionNotOver"))
+            .SetSound(assets.Get<SoundObject>("EventIntros/MissleStrikeShuffle"))
             .SetMinMaxTime(140f, 175f)
             .SetMeta(RandomEventFlags.Permanent)
             .Build();
         missleShuffle.ufo = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
         missleShuffle.ufo.GetComponent<Renderer>().SetMaterial(Resources.FindObjectsOfTypeAll<Material>().Last(x => x.name == "Vent_Base"));
-        missleShuffle.ufo.gameObject.name = "Undefined Satellite";
-        missleShuffle.ufo.transform.localScale = new Vector3(3f, 1f, 3f);
+        missleShuffle.ufo.gameObject.name = "Undentified Satellite";
+        missleShuffle.ufo.transform.localScale = new Vector3(10f, 1f, 10f);
         DestroyImmediate(missleShuffle.ufo.GetComponent<Collider>());
         missleShuffle.ufo.ConvertToPrefab(true);
 
@@ -763,27 +817,34 @@ This is actually an early access release...", false);
         strike.indication = new GameObject("Indication", typeof(MeshFilter), typeof(MeshRenderer));
         strike.indication.transform.SetParent(strike.transform, false);
         strike.indication.layer = LayerMask.NameToLayer("Ignore Raycast B");
-        var leftover = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+        var leftover = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
         strike.indication.GetComponent<MeshFilter>().mesh = leftover.GetComponent<MeshFilter>().mesh;
         DestroyImmediate(leftover);
-        strike.indication.GetComponent<MeshRenderer>().SetMaterial(Resources.FindObjectsOfTypeAll<Material>().Last(x => x.name == "Wind"));
+        strike.indication.transform.localPosition = Vector3.down * 5f;
+        var indicMat = Instantiate(Resources.FindObjectsOfTypeAll<Material>().First(x => x.name == "Wind"));
+        indicMat.SetMainTexture(assets.Get<Texture2D>("MissleShuffleStrike/Indication"));
+        strike.indication.GetComponent<MeshRenderer>().SetMaterial(indicMat);
         strike.indication.transform.localScale = Vector3.zero;
         leftover = GameObject.CreatePrimitive(PrimitiveType.Capsule);
         leftover.transform.SetParent(strike.transform, false);
         leftover.layer = LayerMask.NameToLayer("Ignore Raycast B");
         DestroyImmediate(leftover.GetComponent<Collider>());
-        leftover.GetComponent<MeshRenderer>().SetMaterial(Resources.FindObjectsOfTypeAll<Material>().Last(x => x.name == "FloodWater_Transparent"));
-        leftover.transform.localScale = new Vector3(1f, 90f, 1f);
+        var flames = Instantiate(Resources.FindObjectsOfTypeAll<Material>().Last(x => x.name == "FloodWater_Transparent"));
+        flames.SetMainTexture(assets.Get<Texture2D>("MissleShuffleStrike/Flames"));
+        flames.SetVector("_Tiling", new Vector4(1f, 1f, 0f, 0f));
+        leftover.GetComponent<MeshRenderer>().SetMaterial(flames);
+        leftover.transform.localScale = new Vector3(1f, 0f, 1f);
         strike.impact = leftover;
         leftover.SetActive(false);
 
         var rocket = new GameObject("Missle Strike", typeof(SpriteRenderer));
         rocket.ConvertToPrefab(true);
-        rocket.GetComponent<SpriteRenderer>().sprite = Resources.FindObjectsOfTypeAll<Sprite>().Last(x => x.name == "Balder_Sheet_0_0");
+        rocket.GetComponent<SpriteRenderer>().sprite = assets.Get<Sprite>("MissleShuffleStrike/Rocket");
         rocket.layer = LayerMask.NameToLayer("Billboard");
 
         missleguy.rocketPre = rocket;
         strike.rocket = Instantiate(rocket, strike.transform, false);
+        strike.rocket.transform.localRotation = Quaternion.Euler(Vector3.forward * 180f);
         strike.rocket.SetActive(false);
 
         var collider = strike.GetComponent<CapsuleCollider>();
@@ -947,7 +1008,7 @@ This is actually an early access release...", false);
             .SetMeta(RandomEventFlags.Special)
             .SetMinMaxTime(70, 120)
             .SetJingle(bonusJingle)
-            .SetSound(Resources.FindObjectsOfTypeAll<SoundObject>().Last(x => x.name == "Valve"))
+            .SetSound(assets.Get<SoundObject>("EventIntros/BonusRandomEvent"))
             .Build();
         // Token Outrun
         TokenOutrunEvent tokenOutrunEvent = new RandomEventBuilder<TokenOutrunEvent>(Info)
@@ -956,7 +1017,7 @@ This is actually an early access release...", false);
             .SetMeta(RandomEventFlags.Special)
             .SetMinMaxTime(100, 110)
             .SetJingle(bonusJingle)
-            .SetSound(Resources.FindObjectsOfTypeAll<SoundObject>().Last(x => x.name == "BAL_Tutorial_LookBackPrompt"))
+            .SetSound(assets.Get<SoundObject>("EventIntros/TokenOutrun"))
             .Build();
         TokenOutrunGuy guy = new NPCBuilder<TokenOutrunGuy>(Info)
             .SetAudioTimescaleType(TimeScaleType.Npc)

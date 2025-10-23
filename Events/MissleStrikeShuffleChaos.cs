@@ -108,7 +108,7 @@ public class MissleStrikeShuffleGameManager : BaseGameManager
     protected override void VirtualUpdate()
     {
         base.VirtualUpdate();
-        if (MusicManager.Instance.MidiPlaying)
+        if (MusicManager.Instance.MidiPlaying && MusicManager.Instance.MidiPlayer.MPTK_MidiName == "TimeOut_MMP_Corrected")
         {
             MidiFilePlayer midiPlayer = MusicManager.Instance.MidiPlayer;
             midiPlayer.MPTK_ChannelEnableSet(7, spoopBegan ? !ec.Players[0].Invisible : false); // Pan flute disables
@@ -215,6 +215,12 @@ public class TimeOut_Shuffle : TimeOut
 {
     [SerializeField] private float rate = 10f;
     private float timeToNextAnger = 5f;
+
+    public override void Begin()
+    {
+        active = true; // Does not restart the music.
+        ec.CloseSchool();
+    }
 
     private void Update()
     {
