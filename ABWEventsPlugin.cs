@@ -1057,7 +1057,7 @@ This is actually an early access release...", false);
                             weight = youtuberMode.Value ? 9999 : 99
                         }
                         ]);
-                if (((title == "F3" && num == 2) || (title == "F5" && num == 4)) && level.type == LevelType.Maintenance) // Roads can go into special rooms, which will ruin wormhole room and conveyor room.
+                if (((title == "F3" && num == 2) || (title == "F5" && num == 4)) && (level.type == LevelType.Schoolhouse || level.type == LevelType.Maintenance)) // Roads can go into special rooms, which will ruin wormhole room and conveyor room.
                     level.randomEvents.AddRange([
                     new()
                     {

@@ -71,20 +71,12 @@ internal static class StudioAdds
                 mode.availableGameModes.Add("missleshufflechaos");
             if (mode.id != "rooms")
             {
-                EditorInterfaceModes.AddToolsToCategory(mode, "tools", [
+                EditorInterfaceModes.AddToolsToCategory(mode, "structures", [
                     new GnatSwarmHousingPlacement("gnatswarm_placement", placeholdsprite),
                     new TrafficTroubleTunnelTool("traffictrouble_placement", ABWEventsPlugin.assets.Get<Sprite>("traffictrouble_placement")),
                     new GnatSwarmHousingPlacement("nightmares_placement", ABWEventsPlugin.assets.Get<Sprite>("nightmares_placement")),
                     ]);
-            }
-
-            mode.availableRandomEvents.AddRange([
-                "gnatswarm",
-                "traffictrouble",
-                "nightmares",
-                "missleshufflestrike"
-                ]);
-            mode.pages.AddRange([
+                mode.pages.AddRange([
             new EditorGlobalPage()
             {
                 managerType = typeof(CrazyEventsStudioPage),
@@ -99,6 +91,14 @@ internal static class StudioAdds
                 pageName = "BonusEvents",
                 pageKey = "Ed_GlobalPage_BonusEvents"
             }]);
+            }
+
+            mode.availableRandomEvents.AddRange([
+                "gnatswarm",
+                "traffictrouble",
+                "nightmares",
+                "missleshufflestrike"
+                ]);
         });
     }
 

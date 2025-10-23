@@ -37,6 +37,11 @@ public class MissleStrikeShuffleGameManager : BaseGameManager
 
     private void OnDestroy()
     {
+        // Reset force
+        MusicManager.Instance.MidiPlayer.MPTK_EnablePresetDrum = false;
+        MusicManager.Instance.MidiPlayer.MPTK_ChannelForcedPresetSet(9, -1, -1);
+        //
+
         if (shuffleInstance == this)
             shuffleInstance = null;
     }
