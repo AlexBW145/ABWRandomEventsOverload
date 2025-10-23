@@ -1095,15 +1095,18 @@ This is actually an early access release...", false);
             foreach (var level in scene.GetCustomLevelObjects())
             {
                 var hypers = level.GetCustomModValue(Info, "hyper_events") as List<HyperEventSelection>;
-                if (hypers == null) continue;
-                foreach (var hyper in hyperEvents)
-                    if (level.randomEvents.Exists(x => x.selection.Type == hyper.Type))
-                        hypers.Add(new HyperEventSelection() { replacingExistingEvent = hyper.Type, hyperEvent = hyper });
+                if (hypers != null)
+                {
+                    foreach (var hyper in hyperEvents)
+                        if (level.randomEvents.Exists(x => x.selection.Type == hyper.Type))
+                            hypers.Add(new HyperEventSelection() { replacingExistingEvent = hyper.Type, hyperEvent = hyper });
+                }
                 if ((level.minEvents > 1 || level.maxEvents > 2) && level.timeOutEvent != null)
                 {
                     var bonuses = level.GetCustomModValue(Info, "bonus_events") as List<WeightedRandomEvent>;
-                    if (bonuses == null) continue;
-                    bonuses.AddRange([
+                    if (bonuses != null)
+                    {
+                        bonuses.AddRange([
                     new()
                     {
                         selection = mysteryEvent,
@@ -1115,6 +1118,8 @@ This is actually an early access release...", false);
                         weight = 100
                     }
                         ]);
+                    }
+                    
                 }
                 if (instantHyper.Value)
                     level.SetCustomModValue(Info, "hyper_event_chance", 1f);
@@ -1128,6 +1133,7 @@ This is actually an early access release...", false);
                 {
                     level.timeOutEvent = timeoutShuffle;
                     level.finalLevel = scene.levelTitle == "F5" && scene.levelNo == 4;
+                    level.MarkAsModifiedByMod(Info);
                 }
             }
         });

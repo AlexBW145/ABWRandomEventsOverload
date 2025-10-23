@@ -107,7 +107,7 @@ public class MissleStrikeShuffleGameManager : BaseGameManager
         {
             MidiFilePlayer midiPlayer = MusicManager.Instance.MidiPlayer;
             midiPlayer.MPTK_ChannelEnableSet(7, spoopBegan ? !ec.Players[0].Invisible : false); // Pan flute disables
-        }    
+        }
     }
 
     protected override void ExitedSpawn()
@@ -175,6 +175,11 @@ public class MissleStrikeShuffleGameManager : BaseGameManager
 
     protected override void AllNotebooks()
     {
+        if (!allNotebooksFound)
+        {
+            MusicManager.Instance.MidiPlayer.MPTK_EnablePresetDrum = true;
+            MusicManager.Instance.MidiPlayer.MPTK_ChannelForcedPresetSet(9, 16, 128); // Power Drums
+        }
         base.AllNotebooks();
         foreach (Activity activity in ec.activities)
         {
