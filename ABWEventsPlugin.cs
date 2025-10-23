@@ -1057,7 +1057,7 @@ This is actually an early access release...", false);
                             weight = youtuberMode.Value ? 9999 : 99
                         }
                         ]);
-                if ((title == "F3" && num == 2) || (title == "F5" && num == 4 && level.type == LevelType.Maintenance)) // Roads can go into special rooms, which will ruin wormhole room and conveyor room.
+                if (((title == "F3" && num == 2) || (title == "F5" && num == 4)) && level.type == LevelType.Maintenance) // Roads can go into special rooms, which will ruin wormhole room and conveyor room.
                     level.randomEvents.AddRange([
                     new()
                     {
@@ -1065,7 +1065,7 @@ This is actually an early access release...", false);
                         weight = youtuberMode.Value ? 9999 : 120
                     }
                         ]);
-                if ((title == "F3" && num == 2) || (title == "F5" && num == 4 && level.type != LevelType.Maintenance)) // Hiding too much I see?
+                if (((title == "F3" && num == 2) || (title == "F5" && num == 4)) && level.type != LevelType.Maintenance) // Hiding too much I see?
                     level.randomEvents.AddRange([
                     new()
                     {
@@ -1098,7 +1098,7 @@ This is actually an early access release...", false);
                 if (hypers != null)
                 {
                     foreach (var hyper in hyperEvents)
-                        if (level.randomEvents.Exists(x => x.selection.Type == hyper.Type))
+                        if (level.randomEvents.Exists(x => x?.selection?.Type == hyper.Type))
                             hypers.Add(new HyperEventSelection() { replacingExistingEvent = hyper.Type, hyperEvent = hyper });
                 }
                 if ((level.minEvents > 1 || level.maxEvents > 2) && level.timeOutEvent != null)
