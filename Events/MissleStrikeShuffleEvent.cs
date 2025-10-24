@@ -3,11 +3,10 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using static UnityEngine.ParticleSystem.PlaybackState;
 
 namespace ABWEvents.Events;
 
-public class MissleStrikeShuffleEvent : RandomEvent
+public class MissleStrikeShuffleEvent : RandomEvent // Yes I've mispelt missile
 {
     public static MissleStrikeShuffleEvent Instance { get; private set; }
     public bool isMode => this is MissleStrikeShuffleChaos;

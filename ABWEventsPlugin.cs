@@ -89,7 +89,7 @@ This is actually an early access release...", false);
                 { "Sfx_TrafficTrouble_Horn", "*BEEP*" },
                 { "Sfx_TrafficTrouble_IMPACT", "*BAOMP!*" },
                 { "Sfx_MissleShuffleStrike_IncomingPre", "*BLING!*" },
-                { "Sfx_MissleShuffleStrike_Incoming", "*Target targeted...*" },
+                { "Sfx_MissleShuffleStrike_Incoming", "*Missile target incoming...*" },
                 { "Sfx_MissleShuffleStrike_Exploded", "*BOOM!*" },
 
                 { "Vfx_ABW_GnatSwarm", "Well this is a problem." },
@@ -113,7 +113,7 @@ This is actually an early access release...", false);
                 { "Vfx_ABW_Nightmares", "VEhFIE5JR0hUTUFSRVMgQVJFIENPTUlORy4=" },
                 { "Vfx_ABW_Nightmares1", "SXMgdGhpcyBldmVuIHBhcnQgb2YgdGhlIHNjcmlwdD8=" },
 
-                { "Vfx_ABW_MissleShuffleStrike", "Uh noes, we have sighted a random UFO and is now sending missle strikes towards the schoolhouse?!" },
+                { "Vfx_ABW_MissleShuffleStrike", "Uh noes, we have sighted a random UFO and is now sending missile strikes towards the schoolhouse?!" },
                 { "Vfx_ABW_MissleShuffleStrike1", "Avoid them or else you'll get pushed away!" },
 
                 { "Vfx_ABW_BonusMysteryEvent", "Hmm... A mystery event has appeared." },
@@ -126,13 +126,13 @@ This is actually an early access release...", false);
                 { "Ed_GlobalPage_CrazyEvents", "<color=#FF0200>C</color><color=#26FF2B>R</color><color=#2412FB>A</color><color=#FEFE2B>Z</color><color=#D987FF>Y</color>\nEvents" },
                 { "Ed_GlobalPage_BonusEvents", "Bonus\nEvents" },
 
-                {"Ed_GameMode_MissleShuffleChaos", "Missle Shuffle Chaos"},
-                {"Ed_GameMode_MissleShuffleChaos_Desc", "An undentified flying object has appeared and is now launching missle strikes towards the students!\nMake sure to not stay inside of the blast for too long or else its game over!"},
+                {"Ed_GameMode_MissleShuffleChaos", "Missile Shuffle Chaos"},
+                {"Ed_GameMode_MissleShuffleChaos_Desc", "An unidentified flying object has appeared and is now launching missile strikes towards the students!\nMake sure to not stay inside of the blast for too long or else its game over!"},
 
                 {"Ed_RandomEvent_gnatswarm", "Gnat Swarm\nA bunch of gnats came out of their houses and are now swarming the entire schoolhouse!\nGnats blinds NPCs completely but also hinders the player's stamina."},
                 {"Ed_RandomEvent_traffictrouble", "Traffic Trouble\nTraffic is slowly starting to pick up drivers.\nTry not to get too close to the drivers or else you'll get completely flinged in front of them."},
                 {"Ed_RandomEvent_nightmares", "Nightmares\nTHE NIGHTMARES ARE COMING.\nNightmare creatures can walk through walls and will only target the player,\nwith Cloudy Claustrophobia decreasing the player's stamina by -10 of the amount\nand Terrorcrafters alerting Baldi to the player's location."},
-                {"Ed_RandomEvent_missleshufflestrike", "Missle Shuffle Strike\nAn undentified flying object has appeared and is now launching missle strikes towards the students!\nMissle strikes will push away anyone and anything on touch!"},
+                {"Ed_RandomEvent_missleshufflestrike", "Missile Shuffle Strike\nAn unidentified flying object has appeared and is now launching missile strikes towards the students!\nmissile strikes will push away anyone and anything on touch!"},
 
                 {"Ed_RandomEvent_hyper_gravitychaos", "<color=#FF0200>C</color><color=#26FF2B>R</color><color=#2412FB>A</color><color=#FEFE2B>Z</color><color=#D987FF>Y</color> Gravity Chaos\nShapes are appearing more and more often...\nGravity flippers spawn rate and max amount has been increased!"},
                 {"Ed_RandomEvent_hyper_flood", "<color=#FF0200>C</color><color=#26FF2B>R</color><color=#2412FB>A</color><color=#FEFE2B>Z</color><color=#D987FF>Y</color> Flood\nThe next leak is massive!\nWhirlpools has been buffed significally and will appear more often\nplus the max amount of whirlpools has been increased!"},
@@ -780,7 +780,7 @@ This is actually an early access release...", false);
             .Build();
         missleShuffle.ufo = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
         missleShuffle.ufo.GetComponent<Renderer>().SetMaterial(Resources.FindObjectsOfTypeAll<Material>().Last(x => x.name == "Vent_Base"));
-        missleShuffle.ufo.gameObject.name = "Undentified Satellite";
+        missleShuffle.ufo.gameObject.name = "Unidentified Satellite";
         missleShuffle.ufo.transform.localScale = new Vector3(10f, 1f, 10f);
         DestroyImmediate(missleShuffle.ufo.GetComponent<Collider>());
         missleShuffle.ufo.ConvertToPrefab(true);
