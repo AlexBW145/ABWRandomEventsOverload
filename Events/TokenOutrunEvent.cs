@@ -43,7 +43,10 @@ public class TokenOutrunToken : MonoBehaviour, IEntityTrigger
         entity.Initialize(ec, transform.position);
         var throwSpeed = UnityEngine.Random.Range(7.15f, 8.15f);
         entity.AddForce(new Force(direction, throwSpeed, 0f - throwSpeed));
+        entity.OnEntityMoveInitialCollision += OnEntityMoveCollision;
     }
+
+    private void OnEntityMoveCollision(RaycastHit hit) => transform.forward = Vector3.Reflect(transform.forward, hit.normal);
 
     private void Update()
     {

@@ -6,6 +6,7 @@ using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Runtime.CompilerServices;
+using TMPro;
 using UnityEngine;
 
 namespace ABWEvents.Patches;
@@ -40,9 +41,13 @@ class EventPatches
         x?.npc is TrafficTroubleCar ||
         x?.npc is GnatEntity ||
         x?.npc is NightmareEntity ||
+        x?.npc is MissleStrikeShuffleGuy ||
         x?.npc is TokenOutrunGuy ||
+        x?.npc is UFOEntity ||
         x?.npc is Balder_Entity ||
         x?.npc is Crowd_Entity ||
+        x?.npc is Student ||
+        x?.npc?.Character == Character.Null ||
         x?.npc == null))
         {
             if (car?.npc != null)
@@ -52,11 +57,62 @@ class EventPatches
         x?.npc is TrafficTroubleCar ||
         x?.npc is GnatEntity ||
         x?.npc is NightmareEntity ||
+        x?.npc is MissleStrikeShuffleGuy ||
         x?.npc is TokenOutrunGuy ||
+        x?.npc is UFOEntity ||
         x?.npc is Balder_Entity ||
         x?.npc is Crowd_Entity ||
+        x?.npc is Student ||
+        x?.npc?.Character == Character.Null ||
         x?.npc == null);
     }
+
+    private static FieldInfo _fleeStates = AccessTools.DeclaredField(typeof(TapePlayer), "fleeStates");
+    [HarmonyPatch(typeof(TapePlayer), "Cooldown", MethodType.Enumerator), HarmonyTranspiler]
+    static IEnumerable<CodeInstruction> TapeUndo(IEnumerable<CodeInstruction> instructions) => new CodeMatcher(instructions) // There will be a null error exception in base game because of the students, balders, and even worse...
+        .Start()
+        .MatchForward(true,
+        new CodeMatch(OpCodes.Ldloc_3),
+        new CodeMatch(CodeInstruction.LoadField(typeof(NPC), nameof(NPC.navigationStateMachine))),
+        new CodeMatch(x => x.opcode == OpCodes.Ldloc_S),
+        new CodeMatch(OpCodes.Callvirt, AccessTools.Method(typeof(NavigationStateMachine), nameof(NavigationStateMachine.ChangeState)))
+        ).ThrowIfInvalid("What?? The?? Fuck??").Advance(4) // Get out of the loop.
+        .InsertAndAdvance(
+        new CodeInstruction(OpCodes.Ldloc_1),
+        Transpilers.EmitDelegate<Action<TapePlayer>>((__instance) =>
+        {
+            var fleeStates = _fleeStates.GetValue(__instance) as List<NavigationState_WanderFleeOverride>;
+            foreach (var car in fleeStates.Where(x =>
+        x?.npc is TrafficTroubleCar ||
+        x?.npc is GnatEntity ||
+        x?.npc is NightmareEntity ||
+        x?.npc is MissleStrikeShuffleGuy ||
+        x?.npc is TokenOutrunGuy ||
+        x?.npc is UFOEntity ||
+        x?.npc is Balder_Entity ||
+        x?.npc is Crowd_Entity ||
+        x?.npc is Student ||
+        x?.npc?.Character == Character.Null ||
+        x?.npc == null))
+        {
+            if (car?.npc != null)
+                car.End();
+        }
+            fleeStates.RemoveAll(x =>
+        x?.npc is TrafficTroubleCar ||
+        x?.npc is GnatEntity ||
+        x?.npc is NightmareEntity ||
+        x?.npc is MissleStrikeShuffleGuy ||
+        x?.npc is TokenOutrunGuy ||
+        x?.npc is UFOEntity ||
+        x?.npc is Balder_Entity ||
+        x?.npc is Crowd_Entity ||
+        x?.npc is Student ||
+        x?.npc?.Character == Character.Null ||
+        x?.npc == null);
+        })
+        )
+        .InstructionEnumeration();
 
     [HarmonyPatch(typeof(Navigator), "Update"), HarmonyPostfix]
     static void TheyWalkThroughWalls(Navigator __instance, ref List<Vector3> ___destinationPoints)
@@ -124,5 +180,53 @@ class EventPatches
             foreach (var point in GameObject.FindObjectsOfType<TileBasedObject>(false).Where(x => x is IEventSpawnPlacement))
                 GameObject.Destroy(point.gameObject);
         }
+    }
+
+    [HarmonyPatch(typeof(HudManager), nameof(HudManager.SetItemSelect)), HarmonyPostfix]
+    static void SpikeBallCounts(int value, string key, HudManager __instance, ref TMP_Text ___itemTitle)
+    {
+        if (CoreGameManager.Instance.GetPlayer(__instance.hudNum) != null)
+        {
+            var item = CoreGameManager.Instance.GetPlayer(__instance.hudNum).itm.items[value].item;
+            if (item is ITM_SpikedBall)
+                ___itemTitle.text = string.Format(LocalizationManager.Instance.GetLocalizedText(key), (((ITM_SpikedBall)item).stacks + 1).ToString());
+        }
+    }
+
+    [HarmonyPatch(typeof(ItemManager), nameof(ItemManager.AddItem), [typeof(ItemObject)]), HarmonyPrefix]
+    static bool isSpikedBall(ItemObject item, ItemManager __instance)
+    {
+        if (__instance.maxItem >= 0 && item.item is ITM_SpikedBall)
+        {
+            int stacks = ((ITM_SpikedBall)item.item).stacks;
+            int otherstacks = ITM_SpikedBall.stacksItems.Length - 1;
+            if (__instance.items[__instance.selectedItem].itemType == item.itemType)
+                otherstacks = ((ITM_SpikedBall)__instance.items[__instance.selectedItem].item).stacks;
+            int totalstacks = stacks + otherstacks;
+            if (totalstacks >= ITM_SpikedBall.stacksItems.Length - 1)
+                return true;
+            else if (__instance.items[__instance.selectedItem].itemType == item.itemType && otherstacks < ITM_SpikedBall.stacksItems.Length - 1)
+            {
+                __instance.SetItem(ITM_SpikedBall.stacksItems[totalstacks + 1], __instance.selectedItem);
+                return false;
+            }
+            else
+            {
+                for (int i = 0; i < __instance.maxItem; i++)
+                {
+                    if (__instance.items[i].itemType == item.itemType)
+                    {
+                        otherstacks = ((ITM_SpikedBall)__instance.items[i].item).stacks;
+                        totalstacks = stacks + otherstacks;
+                        if (totalstacks < ITM_SpikedBall.stacksItems.Length - 1)
+                        {
+                            __instance.SetItem(ITM_SpikedBall.stacksItems[totalstacks + 1], i);
+                            return false;
+                        }
+                    }
+                }
+            }
+        }
+        return true;
     }
 }

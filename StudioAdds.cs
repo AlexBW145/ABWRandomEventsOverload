@@ -51,7 +51,8 @@ internal static class StudioAdds
             { "hyper_traffictrouble", ABWEventsPlugin.assets.Get < Sprite >("traffictrouble") },
 
             { "bonus_randomevent", ABWEventsPlugin.assets.Get<Sprite>("bonus_randomevent") },
-            { "bonus_tokenoutrun", placeholdsprite }
+            { "bonus_tokenoutrun", placeholdsprite },
+            { "bonus_ufosmasher", placeholdsprite }
         });
         LevelStudioPlugin.Instance.structureTypes.Add("gnatswarm_placement", typeof(EventSpawnPlacementData));
         var visual = EditorInterface.AddStructureGenericVisual("gnatswarm_placement", LevelLoaderPlugin.Instance.tileBasedObjectPrefabs["gnatswarm_placement"].gameObject);

@@ -70,7 +70,11 @@ This is actually an early access release...", false);
     {
         yield return 2;
         yield return "Extra Stuff...";
+        foreach (var useless in ItemMetaStorage.Instance.FindAll(x => x.tags.Contains("lost_item") || x.tags.Contains("shape_key") || x.tags.Contains("shop_dummy")))
+            useless.tags.Add("abw_eventsoverload_isnotufosmasherloot");
         NightmareEntity.snds = Resources.FindObjectsOfTypeAll<SoundObject>().Where(x => x.soundClip.length < 3f && x.soundType == SoundType.Voice && !x.soundKey.ToLower().StartsWith("sfx_")).ToArray();
+        UFOEntity.regularItem.AddRange(ItemMetaStorage.Instance.FindAll(x => x.value.price >= 200 && x.value.price < 750 && x.value.itemType != Items.None && !x.flags.HasFlag(ItemFlags.Unobtainable) && !x.flags.HasFlag(ItemFlags.RuntimeItem) && !x.tags.Contains("abw_eventsoverload_isnotufosmasherloot")).Select(x => x.value)); // Lowest price is principal's keys and techno-boots.
+        UFOEntity.goodItem.AddRange(ItemMetaStorage.Instance.FindAll(x => x.value.price >= 750 && x.value.price <= 2500 && x.value.itemType != Items.None && !x.flags.HasFlag(ItemFlags.Unobtainable) && !x.flags.HasFlag(ItemFlags.RuntimeItem) && !x.tags.Contains("abw_eventsoverload_isnotufosmasherloot")).Select(x => x.value)); // Lowest expensive price is the grappling hook.
         yield return "Adding events to level loader...";
         if (Chainloader.PluginInfos.ContainsKey("mtm101.rulerp.baldiplus.levelstudioloader"))
             LoaderAdds.AddLevelLoaderStuff();
@@ -91,6 +95,10 @@ This is actually an early access release...", false);
                 { "Sfx_MissleShuffleStrike_IncomingPre", "*BLING!*" },
                 { "Sfx_MissleShuffleStrike_Incoming", "*Missile target incoming...*" },
                 { "Sfx_MissleShuffleStrike_Exploded", "*BOOM!*" },
+                { "Sfx_UFOSmasher_UFOIdle", "*Humming noises*" },
+
+                { "Itm_SpikedBallBonus", "Spiked Ball ({0})" },
+                { "Desc_SpikedBallBonus", "Spiked Ball\nA spiked ball that can destroy ufos.\nYou can also use it towards Baldi and his friends too!" },
 
                 { "Vfx_ABW_GnatSwarm", "Well this is a problem." },
                 { "Vfx_ABW_GnatSwarm1", "A bunch of gnats has came out of their houses" },
@@ -143,6 +151,7 @@ This is actually an early access release...", false);
 
                 {"Ed_RandomEvent_bonus_randomevent", "Mystery Event\nA random event will be summonned and will end by the time class is dismissed!\nRNG is dependent for this event."},
                 {"Ed_RandomEvent_bonus_tokenoutrun", "Token Outrun\nSome random guy appeared and is running away but is accidently dropping the tokens.\nEach token is worth 15 YTPs and will disappear quickly. The runner will also run away from the players so be quick!"},
+                {"Ed_RandomEvent_bonus_ufosmasher", "UFO Smasher\nA bunch of UFOs have appeared out of nowhere with randomized loot!\nSpiked balls will appear in random hallway positionsand throwing enough of them will destroy the UFO! Dropping its loot it has.\nSpiked balls can also be used against Baldi and him friends!"},
 
                 { "Ed_Tool_gnatswarm_placement_Title", "Gnat House" },
                 { "Ed_Tool_gnatswarm_placement_Desc", "Houses a bunch of gnats." },
@@ -190,7 +199,14 @@ This is actually an early access release...", false);
 
             ObjectCreators.CreateSoundObject(AssetLoader.AudioClipFromMod(this, "AudioClip", "MissleStrikeShuffle", "MissleStrikeIncomingPre.wav"), "Sfx_MissleShuffleStrike_IncomingPre", SoundType.Effect, Color.white),
             ObjectCreators.CreateSoundObject(AssetLoader.AudioClipFromMod(this, "AudioClip", "MissleStrikeShuffle", "MissleStrikeIncoming.wav"), "Sfx_MissleShuffleStrike_Incoming", SoundType.Effect, Color.white),
-            ObjectCreators.CreateSoundObject(AssetLoader.AudioClipFromMod(this, "AudioClip", "MissleStrikeShuffle", "MissleStrikeExplosion.wav"), "Sfx_MissleShuffleStrike_Exploded", SoundType.Effect, Color.white)
+            ObjectCreators.CreateSoundObject(AssetLoader.AudioClipFromMod(this, "AudioClip", "MissleStrikeShuffle", "MissleStrikeExplosion.wav"), "Sfx_MissleShuffleStrike_Exploded", SoundType.Effect, Color.white),
+
+            ObjectCreators.CreateSoundObject(AssetLoader.AudioClipFromMod(this, "AudioClip", "UFOSmasher", "UFOidle.wav"), "Sfx_UFOSmasher_UFOIdle", SoundType.Effect, Color.white),
+            ObjectCreators.CreateSoundObject(AssetLoader.AudioClipFromMod(this, "AudioClip", "UFOSmasher", "SpikeBallImpact.wav"), "Sfx_UFOSmasher_SpikeballImpact", SoundType.Effect, Color.white),
+            ObjectCreators.CreateSoundObject(AssetLoader.AudioClipFromMod(this, "AudioClip", "UFOSmasher", "SpikeBallRoll.wav"), "Sfx_UFOSmasher_SpikeballRoll", SoundType.Effect, Color.white),
+            ObjectCreators.CreateSoundObject(AssetLoader.AudioClipFromMod(this, "AudioClip", "UFOSmasher", "UFOspawn.wav"), "Sfx_UFOSmasher_UFOSpawn", SoundType.Effect, Color.white),
+            ObjectCreators.CreateSoundObject(AssetLoader.AudioClipFromMod(this, "AudioClip", "UFOSmasher", "UFOdespawn.wav"), "Sfx_UFOSmasher_UFODespawn", SoundType.Effect, Color.white),
+            ObjectCreators.CreateSoundObject(AssetLoader.AudioClipFromMod(this, "AudioClip", "UFOSmasher", "UFOdies.wav"), "Sfx_UFOSmasher_UFODies", SoundType.Effect, Color.white)
             ], [
                 "EventJingles/ABW",
                 "EventJingles/HyperABW",
@@ -220,7 +236,14 @@ This is actually an early access release...", false);
 
                 "MissleStrikeShuffle/IncomingPre",
                 "MissleStrikeShuffle/Incoming",
-                "MissleStrikeShuffle/Exploded"
+                "MissleStrikeShuffle/Exploded",
+
+                "UFOSmasher/Idling",
+                "UFOSmasher/BallImpact",
+                "UFOSmasher/BallRolling",
+                "UFOSmasher/Spawn",
+                "UFOSmasher/Despawn",
+                "UFOSmasher/Die"
                 ]);
         assets.Get<SoundObject>("EventIntros/GnatSwarm").additionalKeys = [
             new()
@@ -1010,6 +1033,7 @@ This is actually an early access release...", false);
             .SetJingle(bonusJingle)
             .SetSound(assets.Get<SoundObject>("EventIntros/BonusRandomEvent"))
             .Build();
+
         // Token Outrun
         TokenOutrunEvent tokenOutrunEvent = new RandomEventBuilder<TokenOutrunEvent>(Info)
             .SetName("Token Outrun")
@@ -1066,7 +1090,115 @@ This is actually an early access release...", false);
         guy.tokenPrefab = tokenOutrunToken;
         tokenOutrunToken.gameObject.SetActive(true);
 
-        // UFO Catcher
+        // UFO Smasher
+        UFOSmasherEvent smasherEvent = new RandomEventBuilder<UFOSmasherEvent>(Info)
+            .SetName("Event_UFOSmasher")
+            .SetEnum("UFOSmasher")
+            .SetMinMaxTime(135f, 179f)
+            .SetMeta(RandomEventFlags.Special)
+            .SetJingle(bonusJingle)
+            .SetSound(assets.Get<SoundObject>("TrafficTrouble/CarImpact"))
+            .Build();
+        UFOEntity ufoGuy = new NPCBuilder<UFOEntity>(Info)
+            .SetName("UFO Entity")
+            .SetEnum(Character.Null)
+            .SetAirborne()
+            .EnableAcceleration()
+            .AddTrigger()
+            .DisableNavigationPrecision()
+            .SetAudioTimescaleType(TimeScaleType.Environment)
+            .DisableAutoRotation()
+            .Build();
+        ufoGuy.Navigator.accel = 99f;
+        ufoGuy.explodeThing = Resources.FindObjectsOfTypeAll<QuickExplosion>().Last(x => x.name == "QuickExplosion");
+        ufoGuy.spawnSnd = assets.Get<SoundObject>("UFOSmasher/Spawn");
+        ufoGuy.despawnSnd = assets.Get<SoundObject>("UFOSmasher/Despawn");
+        ufoGuy.dieSnd = assets.Get<SoundObject>("UFOSmasher/Die");
+        var prop = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+        DestroyImmediate(prop.GetComponent<Collider>());
+        prop.GetComponent<Renderer>().SetMaterial(Resources.FindObjectsOfTypeAll<Material>().Last(x => x.name == "Vent_Base"));
+        prop.transform.SetParent(ufoGuy.spriteBase.transform, false);
+        prop.transform.localPosition = Vector3.zero;
+        prop.transform.localScale = new Vector3(3f, 1f, 3f);
+        ufoGuy.spriteRenderer[0].transform.localPosition = Vector3.up * 1.5f;
+
+        ufoGuy.audMan = ufoGuy.GetComponent<PropagatedAudioManager>();
+        _soundOnStart.SetValue(ufoGuy.audMan, new SoundObject[]
+            {
+                assets.Get<SoundObject>("UFOSmasher/Idling")
+            });
+        _loopOnStart.SetValue(ufoGuy.audMan, true);
+        ufoGuy.audMan.audioDevice.dopplerLevel = 1f;
+
+        smasherEvent.ufoPrefab = ufoGuy;
+
+        ITM_SpikedBall ballPrefab = Instantiate(ItemMetaStorage.Instance.FindByEnum(Items.Bsoda).value.item, MTM101BaldiDevAPI.prefabTransform).gameObject.AddComponent<ITM_SpikedBall>();
+        DestroyImmediate(ballPrefab.GetComponent<ITM_BSODA>());
+        ballPrefab.entity = ballPrefab.GetComponent<Entity>();
+        ballPrefab.throwSnd = Resources.FindObjectsOfTypeAll<SoundObject>().Last(x => x.name == "CampfireToss");
+        ballPrefab.impactSnd = assets.Get<SoundObject>("UFOSmasher/BallImpact");
+        ballPrefab.damageSnd = assets.Get<SoundObject>("TrafficTrouble/CarImpact");
+        ballPrefab.rollingSnd = assets.Get<SoundObject>("UFOSmasher/BallRolling");
+        PropagatedAudioManager ballAudMan = ballPrefab.gameObject.AddComponent<PropagatedAudioManager>();
+        ballAudMan.audioDevice = trafficCar.gameObject.AddComponent<AudioSource>();
+        ballAudMan.audioDevice.spatialBlend = 1;
+        ballAudMan.audioDevice.rolloffMode = AudioRolloffMode.Custom;
+        ballAudMan.audioDevice.maxDistance = 150;
+        ballAudMan.audioDevice.dopplerLevel = 0;
+        ballAudMan.audioDevice.spread = 0;
+        ballPrefab.audMan = ballAudMan;
+        ballPrefab.transform.GetChild(0).transform.localScale = Vector3.one / 2f;
+        ballPrefab.entity.GetComponent<CapsuleCollider>().height = 4f;
+        ballPrefab.entity.GetComponent<SphereCollider>().radius = 2f;
+        ballPrefab.gameObject.name = "ITM_SpikedBall";
+        _collisionLayerMask.SetValue(ballPrefab.entity, (LayerMask)LayerMask.GetMask("Default", "Ignore Raycast", "Ignore Raycast B", "Windows"));
+
+        SpikeBallFlinger flinger = new EntityBuilder()
+            .SetName("SpikeBall Flinger")
+            .SetBaseRadius(0.5f)
+            .SetHeight(8f)
+            .AddTrigger(2f) // It shouldn't be set to zero...
+            .SetLayerCollisionMask(2113541) // There's no default in the EntityBuilder...
+            .AddRenderbaseFunction((entity) =>
+            {
+                var thing = new GameObject("Nothing");
+                thing.transform.SetParent(entity.transform, false);
+                return thing.transform;
+            })
+            .SetLayer("StandardEntities")
+            .Build().gameObject.AddComponent<SpikeBallFlinger>();
+        flinger.self = flinger.GetComponent<Entity>();
+        ballPrefab.flinger = flinger;
+
+        UFOEntity.ytp = ItemMetaStorage.Instance.GetPointsObject(100, true);
+
+        var largeSprite = Resources.FindObjectsOfTypeAll<Sprite>().Last(x => x.name == "MapMarker_Sheet_0");
+        var smallSprite = Resources.FindObjectsOfTypeAll<Sprite>().Last(x => x.name == "MapMarker_Sheet_0");
+        ItemObject ball = new ItemBuilder(Info)
+            .SetNameAndDescription("Itm_SpikedBallBonus", "Desc_SpikedBallBonus")
+            .SetEnum("SpikedBall")
+            .SetSprites(smallSprite, largeSprite)
+            .SetItemComponent(ballPrefab)
+            .SetShopPrice(3000)
+            .SetMeta(ItemFlags.MultipleUse | ItemFlags.Persists | ItemFlags.CreatesEntity | ItemFlags.RuntimeItem, [])
+            .Build();
+
+        for (int i = 0; i < ITM_SpikedBall.stacksItems.Length; i++)
+        {
+            var ballPrefabAgain = Instantiate(ballPrefab, MTM101BaldiDevAPI.prefabTransform);
+            ItemObject ballAgain = new ItemBuilder(Info)
+                .SetNameAndDescription("Itm_SpikedBallBonus", "Desc_SpikedBallBonus")
+                .SetEnum("SpikedBall")
+                .SetSprites(smallSprite, largeSprite)
+                .SetItemComponent(ballPrefabAgain)
+                .SetMeta(ball.GetMeta())
+                .Build();
+            ballPrefabAgain.stacks = i;
+            ballPrefabAgain.gameObject.name = $"ITM_SpikedBall_{i}";
+            ITM_SpikedBall.stacksItems[i] = ballAgain;
+            if (i == 0)
+                smasherEvent.spikedBall = ballAgain;
+        }
 
         // Token Collector
 
@@ -1177,6 +1309,11 @@ This is actually an early access release...", false);
                     {
                         selection = tokenOutrunEvent,
                         weight = 100
+                    },
+                    new()
+                    {
+                        selection = smasherEvent,
+                        weight = 85
                     }
                         ]);
                     }
@@ -1215,6 +1352,7 @@ This is actually an early access release...", false);
 
             mysteryEvent,
             tokenOutrunEvent,
+            smasherEvent,
 
             timeoutShuffle
             ],
@@ -1233,6 +1371,7 @@ This is actually an early access release...", false);
 
                 "BonusMysteryEvent",
                 "TokenOutrun",
+                "UFOSmasher",
 
                 "TimeOver/MissleShuffleChaos"
                 ]);

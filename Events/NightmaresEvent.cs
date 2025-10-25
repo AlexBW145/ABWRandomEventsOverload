@@ -206,7 +206,7 @@ public class NightmareFissures : MonoBehaviour
         {
             leftovers += Time.deltaTime * ec.EnvironmentTimeScale;
             float actualDuration = leftovers / time;
-            gobj.transform.localScale = Vector3.Lerp(ogscale, scale, Mathf.Pow(2f, -10f * actualDuration) * Mathf.Sin((actualDuration * 10 - 0.75f) * ((2f * Mathf.PI) / 3f)) + 1); // Tweening to the max??
+            gobj.transform.localScale = Vector3.LerpUnclamped(ogscale, scale, Mathf.Pow(2f, -10f * actualDuration) * Mathf.Sin((actualDuration * 10 - 0.75f) * ((2f * Mathf.PI) / 3f)) + 1); // Tweening to the max??
             yield return null;
         }
         yield break;

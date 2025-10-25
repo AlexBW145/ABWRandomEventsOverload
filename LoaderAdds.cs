@@ -26,7 +26,8 @@ internal static class LoaderAdds
             { "hyper_traffictrouble", ABWEventsPlugin.assets.Get<RandomEvent>("CrazyTrafficTrouble") },
 
             { "bonus_randomevent", ABWEventsPlugin.assets.Get<RandomEvent>("BonusMysteryEvent") },
-            { "bonus_tokenoutrun", ABWEventsPlugin.assets.Get<RandomEvent>("TokenOutrun") }
+            { "bonus_tokenoutrun", ABWEventsPlugin.assets.Get<RandomEvent>("TokenOutrun") },
+            { "bonus_ufosmasher", ABWEventsPlugin.assets.Get<RandomEvent>("UFOSmasher") }
         });
         var gnatplacement = new GameObject("Gnat Housing Placement", typeof(GnatSwarm.HousingPlacement));
         gnatplacement.ConvertToPrefab(true);
