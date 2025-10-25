@@ -96,6 +96,11 @@ This is actually an early access release...", false);
                 { "Sfx_MissleShuffleStrike_Incoming", "*Missile target incoming...*" },
                 { "Sfx_MissleShuffleStrike_Exploded", "*BOOM!*" },
                 { "Sfx_UFOSmasher_UFOIdle", "*Humming noises*" },
+                { "Sfx_UFOSmasher_SpikeballImpact", "*BUMP!*" },
+                { "Sfx_UFOSmasher_UFOSpawn", "*Swooshing humming noises*" },
+                { "Sfx_UFOSmasher_UFODespawn", "*Swooshing humming noises*" },
+                { "Sfx_UFOSmasher_SpikeballRoll", "*Rolling...*" },
+                { "Sfx_UFOSmasher_UFODies", "*Malfunction noises!*" },
 
                 { "Itm_SpikedBallBonus", "Spiked Ball ({0})" },
                 { "Desc_SpikedBallBonus", "Spiked Ball\nA spiked ball that can destroy ufos.\nYou can also use it towards Baldi and his friends too!" },

@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -266,6 +265,7 @@ public class NightmareEntity : NPC
     {
         base.Initialize();
         if (audMan == null) audMan = GetComponent<AudioManager>();
+        navigator.passableObstacles.AddRange([PassableObstacle.Window, PassableObstacle.LockedDoor, PassableObstacle.Bully]); // If I did use all of the modded passable obstacles, then it would bug navigation as a whole because some functions will block cells the opposite way. (Look at Traffic Trouble for more details)
         switch (nightmareType)
         {
             case NightmareType.Crawling:

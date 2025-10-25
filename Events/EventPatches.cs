@@ -199,13 +199,13 @@ class EventPatches
         if (__instance.maxItem >= 0 && item.item is ITM_SpikedBall)
         {
             int stacks = ((ITM_SpikedBall)item.item).stacks;
-            int otherstacks = ITM_SpikedBall.stacksItems.Length - 1;
+            int otherstacks = 0;
             if (__instance.items[__instance.selectedItem].itemType == item.itemType)
                 otherstacks = ((ITM_SpikedBall)__instance.items[__instance.selectedItem].item).stacks;
             int totalstacks = stacks + otherstacks;
             if (totalstacks >= ITM_SpikedBall.stacksItems.Length - 1)
                 return true;
-            else if (__instance.items[__instance.selectedItem].itemType == item.itemType && otherstacks < ITM_SpikedBall.stacksItems.Length - 1)
+            else if (__instance.items[__instance.selectedItem].itemType == item.itemType && totalstacks < ITM_SpikedBall.stacksItems.Length - 1)
             {
                 __instance.SetItem(ITM_SpikedBall.stacksItems[totalstacks + 1], __instance.selectedItem);
                 return false;
