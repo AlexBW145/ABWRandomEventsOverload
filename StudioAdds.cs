@@ -11,6 +11,7 @@ using PlusLevelStudio.Editor.GlobalSettingsMenus;
 using PlusLevelStudio.Editor.Tools;
 using PlusStudioLevelFormat;
 using PlusStudioLevelLoader;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -54,18 +55,45 @@ internal static class StudioAdds
             { "bonus_tokenoutrun", placeholdsprite },
             { "bonus_ufosmasher", ABWEventsPlugin.assets.Get <Sprite>("bonus_ufosmasher") }
         });
-        LevelStudioPlugin.Instance.structureTypes.Add("gnatswarm_placement", typeof(EventSpawnPlacementData));
-        var visual = EditorInterface.AddStructureGenericVisual("gnatswarm_placement", LevelLoaderPlugin.Instance.tileBasedObjectPrefabs["gnatswarm_placement"].gameObject);
-        visual.AddComponent<CapsuleCollider>().height = 5f;
-        visual.GetComponent<CapsuleCollider>().center = Vector3.up * 5f;
-        LevelStudioPlugin.Instance.structureTypes.Add("traffictrouble_placement", typeof(EventSpawnPlacementData));
-        visual = EditorInterface.AddStructureGenericVisual("traffictrouble_placement", LevelLoaderPlugin.Instance.tileBasedObjectPrefabs["traffictrouble_placement"].gameObject);
+        var visual = EditorInterface.AddTileBasedObjectVisual("gnatswarm_placement", LevelLoaderPlugin.Instance.tileBasedObjectPrefabs["gnatswarm_placement"].gameObject);
+        visual.AddComponent<SphereCollider>().radius = 3.5f;
+        visual.GetComponent<SphereCollider>().center = Vector3.up * 1f;
+        visual = EditorInterface.AddTileBasedObjectVisual("traffictrouble_placement", LevelLoaderPlugin.Instance.tileBasedObjectPrefabs["traffictrouble_placement"].gameObject);
         visual.AddComponent<BoxCollider>().size = new Vector3(0.5f, 5f, 5f);
         visual.GetComponent<BoxCollider>().center = new Vector3(0f, 5f, 5f);
-        LevelStudioPlugin.Instance.structureTypes.Add("nightmares_placement", typeof(EventSpawnPlacementData));
-        visual = EditorInterface.AddStructureGenericVisual("nightmares_placement", LevelLoaderPlugin.Instance.tileBasedObjectPrefabs["nightmares_placement"].gameObject);
+        visual = EditorInterface.AddTileBasedObjectVisual("nightmares_placement", LevelLoaderPlugin.Instance.tileBasedObjectPrefabs["nightmares_placement"].gameObject);
         visual.AddComponent<SphereCollider>().radius = 5f;
         visual.GetComponent<SphereCollider>().center = Vector3.up * 1f;
+
+        // Obsoleted by Level Studio v1.4.0.0
+        LevelStudioPlugin.Instance.structureTypes.Add("gnatswarm_placement", typeof(EventSpawnPlacementData));
+        LevelStudioPlugin.Instance.structureTypes.Add("traffictrouble_placement", typeof(EventSpawnPlacementData));
+        LevelStudioPlugin.Instance.structureTypes.Add("nightmares_placement", typeof(EventSpawnPlacementData));
+        //
+        LevelStudioPlugin.Instance.editorLevelPreLoadCallbacks.Add((mode, levelData) => // Older builds uses a workaround.
+        {
+            if (levelData.structures.Exists(x => x.type == "gnatswarm_placement"))
+            {
+                var old = (HallDoorStructureLocation)levelData.structures.Find(x => x.type == "gnatswarm_placement");
+                foreach (var item in old.myChildren)
+                    EditorController.Instance.levelData.tileBasedObjects.Add(InsertTileBasedObject(item));
+                levelData.structures.Remove(old);
+            }
+            if (levelData.structures.Exists(x => x.type == "traffictrouble_placement"))
+            {
+                var old = (HallDoorStructureLocation)levelData.structures.Find(x => x.type == "traffictrouble_placement");
+                foreach (var item in old.myChildren)
+                    EditorController.Instance.levelData.tileBasedObjects.Add(InsertTileBasedObject(item));
+                levelData.structures.Remove(old);
+            }
+            if (levelData.structures.Exists(x => x.type == "nightmares_placement"))
+            {
+                var old = (HallDoorStructureLocation)levelData.structures.Find(x => x.type == "nightmares_placement");
+                foreach (var item in old.myChildren)
+                    EditorController.Instance.levelData.tileBasedObjects.Add(InsertTileBasedObject(item));
+                levelData.structures.Remove(old);
+            }
+        });
         EditorInterfaceModes.AddModeCallback((mode, isVanillaComplaint) =>
         {
             if (mode.id == "full")
@@ -103,6 +131,13 @@ internal static class StudioAdds
         });
     }
 
+    private static TileBasedObjectPlacement InsertTileBasedObject(SimpleLocation location) => new TileBasedObjectPlacement
+    {
+        type = location.prefab,
+        position = location.position,
+        direction = location.direction,
+    };
+
     internal static void InsertCrazysIntoList()
     {
         // Some mods may not have editor support but also has crazy event variants...
@@ -132,25 +167,16 @@ internal static class StudioAdds
     }
 }
 
+[Obsolete("It's no use!", false)]
 internal class EventSpawnPlacementData : HallDoorStructureLocation
 {
     public override StructureInfo Compile(EditorLevelData data, BaldiLevel level)
     {
-        for (int i = 0; i < myChildren.Count; i++)
-        {
-            level.tileObjects.Add(new TileObjectInfo()
-            {
-                prefab = myChildren[i].prefab,
-                direction = (PlusDirection)myChildren[i].direction,
-                position = EditorExtensions.ToByte(myChildren[i].position)
-            });
-        }
-        StructureInfo dummyInfo = new StructureInfo(); // Dummy structure info containing the dummy structure game object.
-        dummyInfo.type = "dummystructure_eventsoverload";
-        return dummyInfo;
+        throw new Exception("WHY ARE YOU USING THIS??");
     }
 }
 
+// Considering that Gnat Houses and Nightmare Fissures does not require rotation...
 internal class GnatSwarmHousingPlacement : PointTool // Workaround: tile based objects are not implemented in studio yet, but I have to do a 100% worst way of implementing.
 {
     public override string id => type;
@@ -165,42 +191,30 @@ internal class GnatSwarmHousingPlacement : PointTool // Workaround: tile based o
     protected override bool TryPlace(IntVector2 position)
     {
         EditorController.Instance.AddUndo();
-        EventSpawnPlacementData location = (EventSpawnPlacementData)EditorController.Instance.AddOrGetStructureToData(type, true);
-        SimpleLocation simpleLocation = location.CreateNewChild();
-        simpleLocation.position = position;
-        simpleLocation.direction = Direction.North;
-        simpleLocation.prefab = type;
-        location.myChildren.Add(simpleLocation);
-        EditorController.Instance.UpdateVisual(location);
+        TileBasedObjectPlacement tileBasedObjectPlacement = new TileBasedObjectPlacement
+        {
+            type = type,
+            position = position,
+            direction = Direction.North,
+        };
+        EditorController.Instance.levelData.tileBasedObjects.Add(tileBasedObjectPlacement);
+        EditorController.Instance.AddVisual(tileBasedObjectPlacement);
         return true;
     }
 }
 
-internal class TrafficTroubleTunnelTool : PlaceAndRotateTool // Workaround: Is a poster but can only be placed if the behind cell is not an existing cell.
+internal class TrafficTroubleTunnelTool : TileBasedObjectTool // Workaround: Is a poster but can only be placed if the behind cell is not an existing cell.
 {
     public override string id => type;
-    public string type;
 
-    internal TrafficTroubleTunnelTool(string id, Sprite icon)
-    {
-        type = id;
-        sprite = icon;
-    }
+    internal TrafficTroubleTunnelTool(string id, Sprite icon) : base(id, icon) { }
 
     protected override bool TryPlace(IntVector2 position, Direction dir)
     {
         var cell = EditorController.Instance.levelData.GetCellSafe(position + dir.ToIntVector2());
         if (!EditorController.Instance.levelData.WallFree(position, dir, false) || cell == null || cell?.roomId != 0)
             return false;
-        EditorController.Instance.AddUndo();
-        EventSpawnPlacementData location = (EventSpawnPlacementData)EditorController.Instance.AddOrGetStructureToData(type, true);
-        SimpleLocation simpleLocation = location.CreateNewChild();
-        simpleLocation.position = position;
-        simpleLocation.direction = dir;
-        simpleLocation.prefab = type;
-        location.myChildren.Add(simpleLocation);
-        EditorController.Instance.UpdateVisual(location);
-        return true;
+        return base.TryPlace(position, dir);
     }
 
     public override bool ValidLocation(IntVector2 position)

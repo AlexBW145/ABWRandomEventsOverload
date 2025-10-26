@@ -193,6 +193,65 @@ class EventPatches
         }
     }
 
+    private static MethodInfo _IncreaseItemSelection = AccessTools.Method(typeof(ItemManager), "IncreaseItemSelection");
+    [HarmonyPatch(typeof(ItemManager), nameof(ItemManager.AddItem), [typeof(ItemObject), typeof(Pickup)]), HarmonyPrefix]
+    static bool SpikeBallPickups(ItemObject item, Pickup pickup, ItemManager __instance, ref bool __result, ref bool[] ___slotLocked)
+    {
+        if (__instance.maxItem >= 0 && item.item is ITM_SpikedBall)
+        {
+            if (!__instance.InventoryFull())
+            {
+                __instance.AddItem(item);
+                __result = true;
+                return false;
+            }
+
+            int num = 0;
+            while (___slotLocked[__instance.selectedItem] && num <= __instance.maxItem)
+            {
+                _IncreaseItemSelection.Invoke(__instance, []);
+                num++;
+            }
+
+            int stacks = ((ITM_SpikedBall)item.item).stacks;
+            int otherstacks = 0;
+            if (__instance.items[__instance.selectedItem].itemType == item.itemType)
+                otherstacks = ((ITM_SpikedBall)__instance.items[__instance.selectedItem].item).stacks;
+            int totalstacks = stacks + otherstacks;
+            if (!___slotLocked[__instance.selectedItem])
+            {
+                if (__instance.items[__instance.selectedItem].itemType == item.itemType && totalstacks < ITM_SpikedBall.stacksItems.Length - 1)
+                {
+                    __instance.AddItem(item);
+                    __result = true;
+                    return false;
+                }
+                else
+                {
+                    for (int i = 0; i < __instance.maxItem; i++)
+                    {
+                        if (__instance.items[i].itemType == item.itemType)
+                        {
+                            otherstacks = ((ITM_SpikedBall)__instance.items[i].item).stacks;
+                            totalstacks = stacks + otherstacks;
+                            if (totalstacks < ITM_SpikedBall.stacksItems.Length - 1)
+                            {
+                                __instance.AddItem(item);
+                                __result = true;
+                                return false;
+                            }
+                        }
+                    }
+                }
+                pickup.AssignItem(__instance.items[__instance.selectedItem]);
+                CoreGameManager.Instance.GetHud(__instance.pm.playerNumber).inventory.LoseItem(__instance.selectedItem, __instance.items[__instance.selectedItem]);
+                __instance.AddItem(item);
+                __result = true;
+                return false;
+            }
+        }
+        return true;
+    }
     [HarmonyPatch(typeof(ItemManager), nameof(ItemManager.AddItem), [typeof(ItemObject)]), HarmonyPrefix]
     static bool isSpikedBall(ItemObject item, ItemManager __instance)
     {
