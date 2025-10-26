@@ -72,26 +72,16 @@ internal static class StudioAdds
         //
         LevelStudioPlugin.Instance.editorLevelPreLoadCallbacks.Add((mode, levelData) => // Older builds uses a workaround.
         {
-            if (levelData.structures.Exists(x => x.type == "gnatswarm_placement"))
+            for (int i = levelData.structures.Count - 1; i >= 0; i--)
             {
-                var old = (HallDoorStructureLocation)levelData.structures.Find(x => x.type == "gnatswarm_placement");
-                foreach (var item in old.myChildren)
-                    EditorController.Instance.levelData.tileBasedObjects.Add(InsertTileBasedObject(item));
-                levelData.structures.Remove(old);
-            }
-            if (levelData.structures.Exists(x => x.type == "traffictrouble_placement"))
-            {
-                var old = (HallDoorStructureLocation)levelData.structures.Find(x => x.type == "traffictrouble_placement");
-                foreach (var item in old.myChildren)
-                    EditorController.Instance.levelData.tileBasedObjects.Add(InsertTileBasedObject(item));
-                levelData.structures.Remove(old);
-            }
-            if (levelData.structures.Exists(x => x.type == "nightmares_placement"))
-            {
-                var old = (HallDoorStructureLocation)levelData.structures.Find(x => x.type == "nightmares_placement");
-                foreach (var item in old.myChildren)
-                    EditorController.Instance.levelData.tileBasedObjects.Add(InsertTileBasedObject(item));
-                levelData.structures.Remove(old);
+                var structure = levelData.structures[i];
+                if (structure.type == "gnatswarm_placement" || structure.type == "traffictrouble_placement" || structure.type == "nightmares_placement")
+                {
+                    var old = (HallDoorStructureLocation)structure;
+                    foreach (var item in old.myChildren)
+                        EditorController.Instance.levelData.tileBasedObjects.Add(InsertTileBasedObject(item));
+                    levelData.structures.RemoveAt(i);
+                }
             }
         });
         EditorInterfaceModes.AddModeCallback((mode, isVanillaComplaint) =>
