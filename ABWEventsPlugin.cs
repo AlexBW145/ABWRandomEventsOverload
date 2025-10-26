@@ -21,6 +21,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using UnityEngine;
+using MTM101BaldAPI.Components;
 
 namespace ABWEvents;
 
@@ -68,22 +69,24 @@ This is actually an early access release...", false);
 
     private IEnumerator PostLoad()
     {
-        yield return 2;
+        yield return 3;
         yield return "Extra Stuff...";
-        foreach (var useless in ItemMetaStorage.Instance.FindAll(x => x.tags.Contains("lost_item") || x.tags.Contains("shape_key") || x.tags.Contains("shop_dummy")))
+        foreach (var useless in ItemMetaStorage.Instance.FindAll(x => x.tags.Contains("lost_item") || x.tags.Contains("shape_key") || x.tags.Contains("shop_dummy") || x.flags.HasFlag(ItemFlags.Unobtainable)))
             useless.tags.Add("abw_eventsoverload_isnotufosmasherloot");
         NightmareEntity.snds = Resources.FindObjectsOfTypeAll<SoundObject>().Where(x => x.soundClip.length < 3f && x.soundType == SoundType.Voice && !x.soundKey.ToLower().StartsWith("sfx_")).ToArray();
-        UFOEntity.regularItem.AddRange(ItemMetaStorage.Instance.FindAll(x => x.value.price >= 200 && x.value.price < 750 && x.value.itemType != Items.None && !x.flags.HasFlag(ItemFlags.Unobtainable) && !x.flags.HasFlag(ItemFlags.RuntimeItem) && !x.tags.Contains("abw_eventsoverload_isnotufosmasherloot")).Select(x => x.value)); // Lowest price is principal's keys and techno-boots.
-        UFOEntity.goodItem.AddRange(ItemMetaStorage.Instance.FindAll(x => x.value.price >= 750 && x.value.price <= 2500 && x.value.itemType != Items.None && !x.flags.HasFlag(ItemFlags.Unobtainable) && !x.flags.HasFlag(ItemFlags.RuntimeItem) && !x.tags.Contains("abw_eventsoverload_isnotufosmasherloot")).Select(x => x.value)); // Lowest expensive price is the grappling hook.
+        UFOEntity.regularItem.AddRange(ItemMetaStorage.Instance.FindAll(x => x.value.price >= 200 && x.value.price < 750 && x.value.itemType != Items.None && !x.tags.Contains("abw_eventsoverload_isnotufosmasherloot")).Select(x => x.value)); // Lowest price is principal's keys and techno-boots.
+        UFOEntity.goodItem.AddRange(ItemMetaStorage.Instance.FindAll(x => x.value.price >= 750 && x.value.price <= 2500 && x.value.itemType != Items.None && !x.tags.Contains("abw_eventsoverload_isnotufosmasherloot")).Select(x => x.value)); // Lowest expensive price is the grappling hook.
         yield return "Adding events to level loader...";
         if (Chainloader.PluginInfos.ContainsKey("mtm101.rulerp.baldiplus.levelstudioloader"))
             LoaderAdds.AddLevelLoaderStuff();
+        yield return "Adding content to level studio...";
         if (Chainloader.PluginInfos.ContainsKey("mtm101.rulerp.baldiplus.levelstudio"))
             StudioAdds.AddStuffToLevelStudio();
     }
 
     private void AssetsLoad()
     {
+        #region LOCALIZATION
         AssetLoader.LocalizationFromFunction((lang) =>
         {
             return new Dictionary<string, string>()
@@ -156,7 +159,7 @@ This is actually an early access release...", false);
 
                 {"Ed_RandomEvent_bonus_randomevent", "Mystery Event\nA random event will be summonned and will end by the time class is dismissed!\nRNG is dependent for this event."},
                 {"Ed_RandomEvent_bonus_tokenoutrun", "Token Outrun\nSome random guy appeared and is running away but is accidently dropping the tokens.\nEach token is worth 15 YTPs and will disappear quickly. The runner will also run away from the players so be quick!"},
-                {"Ed_RandomEvent_bonus_ufosmasher", "UFO Smasher\nA bunch of UFOs have appeared out of nowhere with randomized loot!\nSpiked balls will appear in random hallway positionsand throwing enough of them will destroy the UFO! Dropping its loot it has.\nSpiked balls can also be used against Baldi and him friends!"},
+                {"Ed_RandomEvent_bonus_ufosmasher", "UFO Smasher\nA bunch of UFOs have appeared out of nowhere with randomized loot!\nSpiked balls will appear in random hallway positions and throwing enough of them will destroy the UFO!\nDropping its loot it has.\nSpiked balls can also be used against Baldi and him friends!"},
 
                 { "Ed_Tool_gnatswarm_placement_Title", "Gnat House" },
                 { "Ed_Tool_gnatswarm_placement_Desc", "Houses a bunch of gnats." },
@@ -166,6 +169,8 @@ This is actually an early access release...", false);
                 { "Ed_Tool_nightmares_placement_Desc", "Evil residue containment and will always be real." }
             };
         });
+        #endregion
+        #region TRAFFIC TROUBLE CARS
         List<Sprite[]> spritesheets = new List<Sprite[]>();
         foreach (var spritesheet in Directory.GetFiles(Path.Combine(AssetLoader.GetModPath(this), "Texture2D", "TrafficTrouble", "Cars"), "*.png"))
         {
@@ -174,6 +179,8 @@ This is actually an early access release...", false);
         }
         assets.Add("TrafficTrouble/CarSheets", spritesheets);
         assets.Add("SelfInsertGuy", AssetLoader.SpritesFromSpritesheet(5, 1, 1f, Vector2.one / 2f, AssetLoader.TextureFromMod(this, "Texture2D", "selfinsertguy_tvsheet.png")));
+        #endregion
+        #region SOUND ASSETS
         Color him = new Color(0.1921568627f, 0.5411764706f, 1f);
         assets.AddRange<SoundObject>([
             ObjectCreators.CreateSoundObject(AssetLoader.AudioClipFromMod(this, "AudioClip", "EventJingleABW.wav"), "EventJingleABW", SoundType.Effect, Color.white, 0f),
@@ -341,6 +348,8 @@ This is actually an early access release...", false);
                 key = "Vfx_ABW_TokenOutrun2"
             }
             ];
+        #endregion
+        #region TEXTURES & SPRITES
         assets.AddRange<Texture2D>([
             AssetLoader.TextureFromMod(this, "Texture2D", "TrafficTrouble", "Open.png"),
             AssetLoader.TextureFromMod(this, "Texture2D", "TrafficTrouble", "Corner.png"),
@@ -363,11 +372,17 @@ This is actually an early access release...", false);
         "MissleShuffleStrike/Indication"]);
         assets.AddRange([
             AssetLoader.SpriteFromMod(this, Vector2.one/2f, 64f, "Texture2D", "Nightmares", "FissureGlow.png"),
-            AssetLoader.SpriteFromMod(this, Vector2.one/2f, 16f, "Texture2D", "MissleStrikeShuffle", "ARocketThatStartsWithR.png")
+            AssetLoader.SpriteFromMod(this, Vector2.one/2f, 16f, "Texture2D", "MissleStrikeShuffle", "ARocketThatStartsWithR.png"),
+            AssetLoader.SpriteFromMod(this, Vector2.one/2f, 50f, "Texture2D", "UFOSmasher", "SpikedBall_Large.png"),
+            AssetLoader.SpriteFromMod(this, Vector2.one/2f, 1f, "Texture2D", "UFOSmasher", "SpikedBall_Small.png")
             ], [
                 "Nightmares/FissureGlow",
-                "MissleShuffleStrike/Rocket"
+                "MissleShuffleStrike/Rocket",
+                "UFOSmasher/SpikedBall_Large",
+                "UFOSmasher/SpikedBall_Small"
                 ]);
+        #endregion
+        #region TRAFFIC TROUBLE HORNS
         List<SoundObject> sounds = new List<SoundObject>();
         foreach (var sound in Directory.GetFiles(Path.Combine(AssetLoader.GetModPath(this), "AudioClip", "TrafficTrouble", "Horns"), "*.wav"))
         {
@@ -375,7 +390,44 @@ This is actually an early access release...", false);
             sounds.Add(hornSound);
         }
         assets.Add("TrafficTrouble/Horns", sounds);
-
+        #endregion
+        #region SPIKED BALL
+        float sprSize = 12f * 2f;
+        assets.AddRange<Sprite[]>([
+            AssetLoader.SpritesFromSpritesheet(6, 1, sprSize, Vector2.one / 2f, AssetLoader.TextureFromMod(this, "Texture2D", "UFOSmasher", "spikedball_0.png")),
+            AssetLoader.SpritesFromSpritesheet(6, 1, sprSize, Vector2.one / 2f, AssetLoader.TextureFromMod(this, "Texture2D", "UFOSmasher", "spikedball_30.png")),
+            AssetLoader.SpritesFromSpritesheet(6, 1, sprSize, Vector2.one / 2f, AssetLoader.TextureFromMod(this, "Texture2D", "UFOSmasher", "spikedball_60.png")),
+            AssetLoader.SpritesFromSpritesheet(6, 1, sprSize, Vector2.one / 2f, AssetLoader.TextureFromMod(this, "Texture2D", "UFOSmasher", "spikedball_90.png")),
+            AssetLoader.SpritesFromSpritesheet(6, 1, sprSize, Vector2.one / 2f, AssetLoader.TextureFromMod(this, "Texture2D", "UFOSmasher", "spikedball_120.png")),
+            AssetLoader.SpritesFromSpritesheet(6, 1, sprSize, Vector2.one / 2f, AssetLoader.TextureFromMod(this, "Texture2D", "UFOSmasher", "spikedball_150.png")),
+            AssetLoader.SpritesFromSpritesheet(6, 1, sprSize, Vector2.one / 2f, AssetLoader.TextureFromMod(this, "Texture2D", "UFOSmasher", "spikedball_180.png")),
+            AssetLoader.SpritesFromSpritesheet(6, 1, sprSize, Vector2.one / 2f, AssetLoader.TextureFromMod(this, "Texture2D", "UFOSmasher", "spikedball_210.png"))
+            ], [
+                "UFOSmasher/Dir1",
+                "UFOSmasher/Dir2",
+                "UFOSmasher/Dir3",
+                "UFOSmasher/Dir4",
+                "UFOSmasher/Dir5",
+                "UFOSmasher/Dir6",
+                "UFOSmasher/Dir7",
+                "UFOSmasher/Dir8",
+                ]);
+        #endregion
+        #region MODELS
+        var elv0 = Resources.FindObjectsOfTypeAll<Material>().Last(x => x.name == "El4"); // I AM ALMOST AT MY LIMIT, TILEBASE MATERIAL USES A DIFFERENT SHADER.
+        var ufo = AssetLoader.ModelFromMod(this, "Models", "UFOSmashable.obj");
+        var ufoMat = Instantiate(elv0);
+        ufoMat.name = "UFOSmashable";
+        ufoMat.SetMainTexture(AssetLoader.TextureFromMod(this, "Models", "UFOSmashable.png"));
+        ufoMat.SetTexture("_LightGuide", AssetLoader.TextureFromMod(this, "Models", "UFOlightmap.png"));
+        ufo.transform.GetChild(0).GetComponent<Renderer>().SetMaterial(ufoMat);
+        ufo.ConvertToPrefab(true);
+        assets.Add("UFOSmasher/UFOModel", ufo);
+        var gnathouse = AssetLoader.ModelFromMod(this, "Models", "gnathouse.obj");
+        gnathouse.transform.GetChild(0).GetComponent<Renderer>().SetMaterial(Resources.FindObjectsOfTypeAll<Material>().Last(x => x.name == "DarkWood"));
+        gnathouse.ConvertToPrefab(true);
+        assets.Add("GnatSwarm/HouseModel", gnathouse);
+        #endregion
         if (Chainloader.PluginInfos.ContainsKey("mtm101.rulerp.baldiplus.levelstudio"))
         {
             string[] files = Directory.GetFiles(Path.Combine(AssetLoader.GetModPath(this), "Texture2D", "EditorUI"));
@@ -406,11 +458,8 @@ This is actually an early access release...", false);
             .SetSound(assets.Get<SoundObject>("EventIntros/GnatSwarm"))
             .SetMeta(RandomEventFlags.AffectsGenerator)
             .Build();
-        gnatSwarm.housePrefab = GameObject.CreatePrimitive(PrimitiveType.Capsule);
-        gnatSwarm.housePrefab.ConvertToPrefab(true);
-        DestroyImmediate(gnatSwarm.housePrefab.GetComponent<Collider>());
-        gnatSwarm.housePrefab.GetComponent<MeshRenderer>().SetMaterial(Resources.FindObjectsOfTypeAll<Material>().Last(x => x.name == "DarkWood"));
-        gnatSwarm.housePrefab.transform.localScale = new Vector3(1f, 4f, 1f);
+        gnatSwarm.housePrefab = Instantiate(assets.Get<GameObject>("GnatSwarm/HouseModel").transform.GetChild(0).gameObject, MTM101BaldiDevAPI.prefabTransform, false);
+        gnatSwarm.housePrefab.transform.localScale = Vector3.one * 2f;
 
         GnatEntity gnat = new NPCBuilder<GnatEntity>(Info)
             .SetName("Gnat")
@@ -1119,13 +1168,10 @@ This is actually an early access release...", false);
         ufoGuy.spawnSnd = assets.Get<SoundObject>("UFOSmasher/Spawn");
         ufoGuy.despawnSnd = assets.Get<SoundObject>("UFOSmasher/Despawn");
         ufoGuy.dieSnd = assets.Get<SoundObject>("UFOSmasher/Die");
-        var prop = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
-        DestroyImmediate(prop.GetComponent<Collider>());
-        prop.GetComponent<Renderer>().SetMaterial(Resources.FindObjectsOfTypeAll<Material>().Last(x => x.name == "Vent_Base"));
-        prop.transform.SetParent(ufoGuy.spriteBase.transform, false);
+        var prop = Instantiate(assets.Get<GameObject>("UFOSmasher/UFOModel").transform.GetChild(0), ufoGuy.spriteBase.transform, false);
         prop.transform.localPosition = Vector3.zero;
-        prop.transform.localScale = new Vector3(3f, 1f, 3f);
-        ufoGuy.spriteRenderer[0].transform.localPosition = Vector3.up * 1.5f;
+        prop.transform.localScale = Vector3.one * 3f;
+        ufoGuy.spriteRenderer[0].transform.localPosition = Vector3.up * 0.5f;
 
         ufoGuy.audMan = ufoGuy.GetComponent<PropagatedAudioManager>();
         _soundOnStart.SetValue(ufoGuy.audMan, new SoundObject[]
@@ -1156,6 +1202,40 @@ This is actually an early access release...", false);
         ballPrefab.entity.GetComponent<CapsuleCollider>().height = 4f;
         ballPrefab.entity.GetComponent<SphereCollider>().radius = 2f;
         ballPrefab.gameObject.name = "ITM_SpikedBall";
+        AnimatedSpriteRotator ballRot = ballPrefab.gameObject.AddComponent<AnimatedSpriteRotator>();
+        _renderer.SetValue(ballRot, ballPrefab.transform.GetChild(0).GetComponentInChildren<SpriteRenderer>());
+        SpriteRotationMap rollerRotationMap = new SpriteRotationMap()
+        {
+            angleCount = 8,
+        };
+        var dir1 = assets.Get<Sprite[]>("UFOSmasher/Dir1");
+        var dir2 = assets.Get<Sprite[]>("UFOSmasher/Dir2");
+        var dir3 = assets.Get<Sprite[]>("UFOSmasher/Dir3");
+        var dir4 = assets.Get<Sprite[]>("UFOSmasher/Dir4");
+        var dir5 = assets.Get<Sprite[]>("UFOSmasher/Dir5");
+        var dir6 = assets.Get<Sprite[]>("UFOSmasher/Dir6");
+        var dir7 = assets.Get<Sprite[]>("UFOSmasher/Dir7");
+        var dir8 = assets.Get<Sprite[]>("UFOSmasher/Dir8");
+        List<Sprite> rollersprites = new List<Sprite>();
+        for (int i = 0; i < 6; i++)
+        {
+            rollersprites.AddRange([
+                dir5[i],
+                dir6[i],
+                dir7[i],
+                dir8[i],
+                dir1[i],
+                dir2[i],
+                dir3[i],
+                dir4[i]
+                ]);
+        }
+        _spriteSheet.SetValue(rollerRotationMap, rollersprites.ToArray());
+        sheet.SetValue(ballRot, new SpriteRotationMap[] { rollerRotationMap });
+        ballPrefab.animator = ballPrefab.gameObject.AddComponent<CustomSpriteRotatorAnimator>();
+        ballPrefab.animator.spriteRotator = ballRot;
+        ballPrefab.animation = [.. dir5]; // The custom animation classes are not serialized tho...
+
         _collisionLayerMask.SetValue(ballPrefab.entity, (LayerMask)LayerMask.GetMask("Default", "Ignore Raycast", "Ignore Raycast B", "Windows"));
 
         SpikeBallFlinger flinger = new EntityBuilder()
@@ -1177,15 +1257,15 @@ This is actually an early access release...", false);
 
         UFOEntity.ytp = ItemMetaStorage.Instance.GetPointsObject(100, true);
 
-        var largeSprite = Resources.FindObjectsOfTypeAll<Sprite>().Last(x => x.name == "MapMarker_Sheet_0");
-        var smallSprite = Resources.FindObjectsOfTypeAll<Sprite>().Last(x => x.name == "MapMarker_Sheet_0");
+        var largeSprite = assets.Get<Sprite>("UFOSmasher/SpikedBall_Large");
+        var smallSprite = assets.Get<Sprite>("UFOSmasher/SpikedBall_Small");
         ItemObject ball = new ItemBuilder(Info)
             .SetNameAndDescription("Itm_SpikedBallBonus", "Desc_SpikedBallBonus")
             .SetEnum("SpikedBall")
             .SetSprites(smallSprite, largeSprite)
             .SetItemComponent(ballPrefab)
-            .SetShopPrice(3000)
-            .SetMeta(ItemFlags.MultipleUse | ItemFlags.Persists | ItemFlags.CreatesEntity | ItemFlags.RuntimeItem, [])
+            .SetShopPrice(50)
+            .SetMeta(ItemFlags.MultipleUse | ItemFlags.Persists | ItemFlags.CreatesEntity, ["abw_eventsoverload_isnotufosmasherloot"])
             .Build();
 
         for (int i = 0; i < ITM_SpikedBall.stacksItems.Length; i++)
@@ -1453,4 +1533,12 @@ internal interface IEventSpawnPlacement
     public abstract Cell GetCellPos(EnvironmentController ec);
 
     public abstract void MarkAsFound(RandomEvent _event);
+}
+
+// Figured that this is easier than doing the same thing from Siege Cannon Cart.
+public class CustomSpriteRotatorAnimator : CustomAnimatorMono<AnimatedSpriteRotator, CustomAnimation<Sprite>, Sprite>
+{
+    public AnimatedSpriteRotator spriteRotator;
+    public override AnimatedSpriteRotator affectedObject { get => spriteRotator; set => spriteRotator = value; }
+    protected override void UpdateFrame() => affectedObject.targetSprite = currentFrame.value;
 }

@@ -52,7 +52,7 @@ internal static class StudioAdds
 
             { "bonus_randomevent", ABWEventsPlugin.assets.Get<Sprite>("bonus_randomevent") },
             { "bonus_tokenoutrun", placeholdsprite },
-            { "bonus_ufosmasher", placeholdsprite }
+            { "bonus_ufosmasher", ABWEventsPlugin.assets.Get <Sprite>("bonus_ufosmasher") }
         });
         LevelStudioPlugin.Instance.structureTypes.Add("gnatswarm_placement", typeof(EventSpawnPlacementData));
         var visual = EditorInterface.AddStructureGenericVisual("gnatswarm_placement", LevelLoaderPlugin.Instance.tileBasedObjectPrefabs["gnatswarm_placement"].gameObject);
@@ -73,7 +73,7 @@ internal static class StudioAdds
             if (mode.id != "rooms")
             {
                 EditorInterfaceModes.AddToolsToCategory(mode, "structures", [
-                    new GnatSwarmHousingPlacement("gnatswarm_placement", placeholdsprite),
+                    new GnatSwarmHousingPlacement("gnatswarm_placement", ABWEventsPlugin.assets.Get<Sprite>("gnatswarm_placement")),
                     new TrafficTroubleTunnelTool("traffictrouble_placement", ABWEventsPlugin.assets.Get<Sprite>("traffictrouble_placement")),
                     new GnatSwarmHousingPlacement("nightmares_placement", ABWEventsPlugin.assets.Get<Sprite>("nightmares_placement")),
                     ]);

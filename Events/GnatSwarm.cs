@@ -36,7 +36,7 @@ public class GnatSwarm : RandomEvent
     private void CreateHousing(Cell cell)
     {
         var house = Instantiate(housePrefab, cell.room.objectObject.transform, false);
-        house.transform.position = cell.CenterWorldPosition;
+        house.transform.position = cell.FloorWorldPosition;
         cell.AddRenderer(house.GetComponent<Renderer>());
         cell.HardCover(CellCoverage.Down);
         spawnPoints.Add(cell.position);

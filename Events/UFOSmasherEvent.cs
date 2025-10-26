@@ -1,4 +1,6 @@
 ﻿using MTM101BaldAPI;
+using MTM101BaldAPI.Components;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -99,6 +101,12 @@ public class UFOEntity : NPC
         audMan.PlaySingle(spawnSnd);
     }
 
+    protected override void VirtualUpdate()
+    {
+        base.VirtualUpdate();
+        spriteBase.transform.localRotation = Quaternion.Euler(spriteBase.transform.localRotation.eulerAngles + (Vector3.down * (Time.deltaTime * ec.NpcTimeScale) * (float)Math.PI * navigator.speed));
+    }
+
     private IEnumerator SpawnAnim()
     {
         float timer = 0f;
@@ -116,6 +124,7 @@ public class UFOEntity : NPC
     private IEnumerator DespawnAnim()
     {
         float timer = 0f;
+        navigator.Entity.SetTrigger(false);
         audMan.pitchModifier = 1f;
         if (hits >= totalHits)
         {
@@ -191,6 +200,8 @@ public class ITM_SpikedBall : Item, IEntityTrigger
     private EnvironmentController ec;
     private float time = 9f;
     private bool outOfPlayerCol = false;
+    public CustomSpriteRotatorAnimator animator;
+    [SerializeField] internal List<Sprite> animation = new List<Sprite>();
 
     public void EntityTriggerEnter(Collider other, bool validCollision)
     {
@@ -242,6 +253,8 @@ public class ITM_SpikedBall : Item, IEntityTrigger
 
     public override bool Use(PlayerManager pm)
     {
+        animator.animations.Add("rolling", new CustomAnimation<Sprite>(24, animation.ToArray()));
+        animator.SetDefaultAnimation("rolling", 1f);
         ec = pm.ec;
         transform.position = pm.transform.position;
         transform.forward = CoreGameManager.Instance.GetCamera(pm.playerNumber).transform.forward;
@@ -261,14 +274,14 @@ public class ITM_SpikedBall : Item, IEntityTrigger
 
     private IEnumerator ThrowAnim()
     {
-        float height = 5f;
-        while (height > 0f)
+        float height = 6f;
+        while (height > 1f)
         {
             height -= 25f * Time.deltaTime * ec.EnvironmentTimeScale;
             entity.SetHeight(height);
             yield return null;
         }
-        entity.SetHeight(0f);
+        entity.SetHeight(1f);
         entity.SetGrounded(true);
         audMan.PlaySingle(impactSnd);
         audMan.QueueAudio(rollingSnd, true);

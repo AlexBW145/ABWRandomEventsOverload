@@ -32,7 +32,7 @@ internal static class LoaderAdds
         var gnatplacement = new GameObject("Gnat Housing Placement", typeof(GnatSwarm.HousingPlacement));
         gnatplacement.ConvertToPrefab(true);
         var rend = GameObject.Instantiate(((GnatSwarm)ABWEventsPlugin.assets.Get<RandomEvent>("GnatSwarm")).housePrefab, gnatplacement.transform, false);
-        rend.transform.localPosition = Vector3.up * 5f;
+        rend.transform.localPosition = Vector3.zero;
         LevelLoaderPlugin.Instance.tileBasedObjectPrefabs.Add("gnatswarm_placement", gnatplacement.GetComponent<GnatSwarm.HousingPlacement>());
         var trafficplacement = new GameObject("Traffic Tunnel Placement", typeof(TrafficTroubleEvent.TunnelPlacement));
         trafficplacement.ConvertToPrefab(true);
