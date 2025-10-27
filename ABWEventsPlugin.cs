@@ -23,7 +23,6 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using UnityEngine;
-using static TMPro.SpriteAssetUtilities.TexturePacker_JsonArray;
 
 namespace ABWEvents;
 
@@ -141,6 +140,12 @@ This is actually an early access release...", false);
                 { "Vfx_ABW_TokenOutrun1", "But they're accidentally dropping some," },
                 { "Vfx_ABW_TokenOutrun2", "grab them before its too late!" },
 
+                { "Vfx_ABW_UFOSmasher", "A bunch of UFOs has appeared out of nowhere!" },
+                { "Vfx_ABW_UFOSmasher1", "I've placed in spiked balls around the hallways so that you can fight back!" },
+
+                { "Vfx_ABW_TokenCollector", "Tokens are starting to appear around the hallways," },
+                { "Vfx_ABW_TokenCollector1", "collect them before others do!" },
+
                 { "Ed_GlobalPage_CrazyEvents", "<color=#FF0200>C</color><color=#26FF2B>R</color><color=#2412FB>A</color><color=#FEFE2B>Z</color><color=#D987FF>Y</color>\nEvents" },
                 { "Ed_GlobalPage_BonusEvents", "Bonus\nEvents" },
 
@@ -199,6 +204,8 @@ This is actually an early access release...", false);
             ObjectCreators.CreateSoundObject(AssetLoader.AudioClipFromMod(this, "AudioClip", "Intros", "MissleStrikeShuffleIntro.wav"), "Vfx_ABW_MissleShuffleStrike", SoundType.Voice, him),
             ObjectCreators.CreateSoundObject(AssetLoader.AudioClipFromMod(this, "AudioClip", "Intros", "MysteryEventIntro.wav"), "Vfx_ABW_BonusMysteryEvent", SoundType.Voice, him),
             ObjectCreators.CreateSoundObject(AssetLoader.AudioClipFromMod(this, "AudioClip", "Intros", "TokenOutrunIntro.wav"), "Vfx_ABW_TokenOutrun", SoundType.Voice, him),
+            ObjectCreators.CreateSoundObject(AssetLoader.AudioClipFromMod(this, "AudioClip", "Intros", "UFOSmasherIntro.wav"), "Vfx_ABW_UFOSmasher", SoundType.Voice, him),
+            ObjectCreators.CreateSoundObject(AssetLoader.AudioClipFromMod(this, "AudioClip", "Intros", "TokenCollectorIntro.wav"), "Vfx_ABW_TokenCollector", SoundType.Voice, him),
 
             ObjectCreators.CreateSoundObject(AssetLoader.AudioClipFromMod(this, "AudioClip", "GnatSwarm", "GnatIdling.wav"), "Sfx_GnatIdling", SoundType.Effect, Color.white),
             ObjectCreators.CreateSoundObject(AssetLoader.AudioClipFromMod(this, "AudioClip", "GnatSwarm", "Gnattack.wav"), "Sfx_Gnattack", SoundType.Effect, Color.white),
@@ -236,6 +243,8 @@ This is actually an early access release...", false);
                 "EventIntros/MissleStrikeShuffle",
                 "EventIntros/BonusRandomEvent",
                 "EventIntros/TokenOutrun",
+                "EventIntros/UFOSmasher",
+                "EventIntros/TokenCollector",
 
                 "GnatSwarm/Gnat",
                 "GnatSwarm/Gnattack",
@@ -348,6 +357,20 @@ This is actually an early access release...", false);
             {
                 time = 6.35f,
                 key = "Vfx_ABW_TokenOutrun2"
+            }
+            ];
+        assets.Get<SoundObject>("EventIntros/UFOSmasher").additionalKeys = [
+            new()
+            {
+                time = 2.655f,
+                key = "Vfx_ABW_UFOSmasher1"
+            }
+            ];
+        assets.Get<SoundObject>("EventIntros/TokenCollector").additionalKeys = [
+            new()
+            {
+                time = 2.445f,
+                key = "Vfx_ABW_TokenCollector1"
             }
             ];
         #endregion
@@ -1166,7 +1189,7 @@ This is actually an early access release...", false);
             .SetMinMaxTime(135f, 179f)
             .SetMeta(RandomEventFlags.Special)
             .SetJingle(bonusJingle)
-            .SetSound(assets.Get<SoundObject>("TrafficTrouble/CarImpact"))
+            .SetSound(assets.Get<SoundObject>("EventIntros/UFOSmasher"))
             .Build();
         UFOEntity ufoGuy = new NPCBuilder<UFOEntity>(Info)
             .SetName("UFO Entity")
@@ -1311,7 +1334,7 @@ This is actually an early access release...", false);
             .SetEnum("TokenCollector")
             .SetMinMaxTime(120f, 141f)
             .SetJingle(bonusJingle)
-            .SetSound(assets.Get<SoundObject>("GnatSwarm/Gnattack"))
+            .SetSound(assets.Get<SoundObject>("EventIntros/TokenCollector"))
             .SetMeta(RandomEventFlags.Special)
             .Build();
         leftover = new GameObject("Token Collector Token");
@@ -1472,7 +1495,7 @@ This is actually an early access release...", false);
                     new()
                     {
                         selection = collectorEvent,
-                        weight = 9999 //100
+                        weight = 100
                     }
                         ]);
                     }

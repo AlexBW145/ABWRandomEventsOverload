@@ -49,11 +49,12 @@ internal static class StudioAdds
             { "hyper_studentshuffle", LevelStudioPlugin.Instance.eventSprites["studentshuffle"] },
             { "hyper_balderdash", LevelStudioPlugin.Instance.eventSprites["balderdash"] },
             { "hyper_gnatswarm", ABWEventsPlugin.assets.Get<Sprite>("gnatswarm") },
-            { "hyper_traffictrouble", ABWEventsPlugin.assets.Get < Sprite >("traffictrouble") },
+            { "hyper_traffictrouble", ABWEventsPlugin.assets.Get <Sprite>("traffictrouble") },
 
             { "bonus_randomevent", ABWEventsPlugin.assets.Get<Sprite>("bonus_randomevent") },
             { "bonus_tokenoutrun", placeholdsprite },
-            { "bonus_ufosmasher", ABWEventsPlugin.assets.Get <Sprite>("bonus_ufosmasher") }
+            { "bonus_ufosmasher", ABWEventsPlugin.assets.Get<Sprite>("bonus_ufosmasher") },
+            { "bonus_tokencollector", ABWEventsPlugin.assets.Get<Sprite>("bonus_tokencollector") }
         });
         var visual = EditorInterface.AddTileBasedObjectVisual("gnatswarm_placement", LevelLoaderPlugin.Instance.tileBasedObjectPrefabs["gnatswarm_placement"].gameObject);
         visual.AddComponent<SphereCollider>().radius = 3.5f;
