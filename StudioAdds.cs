@@ -444,7 +444,7 @@ public class BonusEventsStudioPage : GlobalSettingsUIExchangeHandler // Again?
     }
 }
 
-[HarmonyPatch]
+[ConditionalPatchMod("mtm101.rulerp.baldiplus.levelstudio"), HarmonyPatch]
 class StudioPatches
 {
     [HarmonyPatch(typeof(LevelSettingsExchangeHandler), nameof(LevelSettingsExchangeHandler.ToggleEvent)), HarmonyPrefix]
