@@ -104,7 +104,7 @@ public class UFOEntity : NPC
     protected override void VirtualUpdate()
     {
         base.VirtualUpdate();
-        spriteBase.transform.localRotation = Quaternion.Euler(spriteBase.transform.localRotation.eulerAngles + (Vector3.down * (Time.deltaTime * ec.NpcTimeScale) * (float)Math.PI * navigator.speed));
+        spriteBase.transform.Rotate(Vector3.down * (Time.deltaTime * ec.NpcTimeScale) * (float)Math.PI * navigator.speed, Space.Self);
     }
 
     private IEnumerator SpawnAnim()

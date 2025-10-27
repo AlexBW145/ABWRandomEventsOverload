@@ -1,4 +1,6 @@
-﻿using System.Linq;
+﻿using System;
+using System.Collections;
+using System.Linq;
 using UnityEngine;
 
 namespace ABWEvents.Events;
@@ -27,12 +29,13 @@ public class TokenOutrunToken : MonoBehaviour, IEntityTrigger
     [SerializeField] internal int ytps = 15;
     [SerializeField] internal SoundObject collected;
     [SerializeField] internal AudioManager audMan;
-    [SerializeField] internal float startHeight = 6f, endHeight = 0.5f, gravity = 10f;
+    [SerializeField] internal float startHeight = 6f, endHeight = 0.5f, gravity = 25f;
     private float height, existingTime = 1.1f;
     private EnvironmentController ec;
     private Vector3 direction;
     private bool touchedGround, gotTouched;
     [SerializeField] internal Transform render;
+    private IEnumerator bouncer;
 
     internal void Spawn(EnvironmentController _ec, Vector3 forward)
     {
@@ -48,18 +51,41 @@ public class TokenOutrunToken : MonoBehaviour, IEntityTrigger
 
     private void OnEntityMoveCollision(RaycastHit hit) => transform.forward = Vector3.Reflect(transform.forward, hit.normal);
 
+    private IEnumerator Bounce()
+    {
+        float time = 0f;
+        while (time <= 1f)
+        {
+            time += Time.deltaTime * ec.EnvironmentTimeScale;
+            entity.SetHeight(Mathf.Lerp(endHeight, endHeight + 2f, Mathf.Sin((time * Mathf.PI) / 2f)));
+            yield return null;
+        }
+        time = 0f;
+        while (time <= 1f)
+        {
+            time += Time.deltaTime * ec.EnvironmentTimeScale;
+            entity.SetHeight(Mathf.Lerp(endHeight + 2f, -1.5f, 1f - Mathf.Cos((time * Mathf.PI) / 2f)));
+            yield return null;
+        }
+        Destroy(gameObject);
+        yield break;
+    }
+
     private void Update()
     {
         if (!gotTouched)
         {
+            render.GetChild(0).Rotate((Vector3.one * 15f) * (Time.deltaTime * ec.EnvironmentTimeScale) * (float)Math.PI * gravity, Space.Self);
             if (!touchedGround)
             {
-                height -= gravity * Time.deltaTime * ec.EnvironmentTimeScale;
+                height -= gravity * (Time.deltaTime * ec.EnvironmentTimeScale);
                 entity.UpdateInternalMovement(Vector3.zero);
                 if (height <= endHeight)
                 {
                     height = endHeight;
                     touchedGround = true;
+                    bouncer = Bounce();
+                    StartCoroutine(bouncer);
                 }
 
                 entity.SetHeight(height);
@@ -67,10 +93,10 @@ public class TokenOutrunToken : MonoBehaviour, IEntityTrigger
             else
             {
                 entity.UpdateInternalMovement(direction * 5f * ec.EnvironmentTimeScale);
-                if (existingTime > 0f)
+                /*if (existingTime > 0f)
                     existingTime -= Time.deltaTime * ec.EnvironmentTimeScale;
                 else
-                    Destroy(gameObject);
+                    Destroy(gameObject);*/
             }
         }
         else
@@ -78,7 +104,7 @@ public class TokenOutrunToken : MonoBehaviour, IEntityTrigger
             if (existingTime > 0f)
             {
                 existingTime -= Time.deltaTime * ec.EnvironmentTimeScale;
-                render.GetChild(0).localScale += Vector3.one * 0.1f;
+                render.GetChild(0).localScale = Vector3.Lerp(Vector3.zero, Vector3.one, existingTime);
             }
             else
                 Destroy(gameObject);
@@ -106,6 +132,8 @@ public class TokenOutrunToken : MonoBehaviour, IEntityTrigger
 
     private void Destroy()
     {
+        if (bouncer != null)
+            StopCoroutine(bouncer);
         existingTime = 1f;
         gotTouched = true;
         audMan.PlaySingle(collected);

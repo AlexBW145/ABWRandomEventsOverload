@@ -91,7 +91,7 @@ public class MissleStrikeShuffleGuy : NPC
         while (spintime < 1.2f)
         {
             spintime += Time.deltaTime * ec.NpcTimeScale;
-            transform.rotation = Quaternion.Euler(transform.rotation.eulerAngles + ((Vector3.up * 30f) * (Time.deltaTime * ec.NpcTimeScale) * (5f - (spintime * 5f)) * (float)Math.PI * 3f));
+            transform.Rotate((Vector3.up * 30f) * (Time.deltaTime * ec.NpcTimeScale) * (5f - (spintime * 5f)) * (float)Math.PI * 3f);
             overrider.SetHeight(55f + spintime);
             yield return null;
         }
@@ -236,9 +236,9 @@ public class MissleStrikeImpact : MonoBehaviour
         if (Active)
         {
             if (indication.activeSelf)
-                indication.transform.localRotation = Quaternion.Euler(indication.transform.localRotation.eulerAngles + ((Vector3.down * 210f) * (Time.deltaTime * ec.EnvironmentTimeScale)));
+                indication.transform.Rotate((Vector3.down * 210f) * (Time.deltaTime * ec.EnvironmentTimeScale), Space.Self);
             else if (impact.activeSelf)
-                impact.transform.localRotation = Quaternion.Euler(impact.transform.localRotation.eulerAngles + ((Vector3.up * 90f) * (Time.deltaTime * ec.EnvironmentTimeScale)));
+                impact.transform.Rotate((Vector3.up * 90f) * (Time.deltaTime * ec.EnvironmentTimeScale), Space.Self);
         }
     }
 

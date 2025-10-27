@@ -22,6 +22,7 @@ using System.Linq;
 using System.Reflection;
 using UnityEngine;
 using MTM101BaldAPI.Components;
+using MonoMod.Utils;
 
 namespace ABWEvents;
 
@@ -427,6 +428,20 @@ This is actually an early access release...", false);
         gnathouse.transform.GetChild(0).GetComponent<Renderer>().SetMaterial(Resources.FindObjectsOfTypeAll<Material>().Last(x => x.name == "DarkWood"));
         gnathouse.ConvertToPrefab(true);
         assets.Add("GnatSwarm/HouseModel", gnathouse);
+        var token = AssetLoader.ModelFromMod(this, "Models", "PlusToken.obj");
+        token.ConvertToPrefab(true);
+        var baseToken = Instantiate(elv0);
+        baseToken.name = "YTPTokenGold";
+        baseToken.SetMainTexture(AssetLoader.TextureFromMod(this, "Models", "PlusTokenGold.png"));
+        var basicToken = Instantiate(elv0);
+        basicToken.name = "YTPTokenGreen";
+        basicToken.SetMainTexture(AssetLoader.TextureFromMod(this, "Models", "PlusTokenGreen.png"));
+        var moderateToken = Instantiate(elv0);
+        moderateToken.name = "YTPTokenSilver";
+        moderateToken.SetMainTexture(AssetLoader.TextureFromMod(this, "Models", "PlusTokenSilver.png"));
+        assets.AddRange([basicToken,  moderateToken, baseToken], ["TokenGreen", "TokenSilver", "TokenGold"]);
+        token.transform.GetChild(0).GetComponent<Renderer>().SetMaterial(baseToken);
+        assets.Add("TokenModel", token);
         #endregion
         if (Chainloader.PluginInfos.ContainsKey("mtm101.rulerp.baldiplus.levelstudio"))
         {
@@ -1122,17 +1137,16 @@ This is actually an early access release...", false);
                 transform.name = "RenderBase";
                 transform.transform.SetParent(entity.transform, false);
                 transform.gameObject.layer = entity.gameObject.layer;
-                var mesh = GameObject.CreatePrimitive(PrimitiveType.Sphere).GetComponent<MeshFilter>();
-                mesh.transform.SetParent(transform, false);
+                var mesh = Instantiate(assets.Get<GameObject>("TokenModel").transform.GetChild(0).gameObject, transform, false);
                 mesh.transform.localScale = Vector3.one;
-                mesh.gameObject.layer = LayerMask.NameToLayer("Billboard");
-                mesh.GetComponent<MeshRenderer>().SetMaterial(Resources.FindObjectsOfTypeAll<Material>().Last(x => x.name == "Polygon"));
-                DestroyImmediate(mesh.GetComponent<Collider>());
-                return mesh.transform;
+                //mesh.transform.localRotation = Quaternion.Euler(Vector3.up * 90f); // Does not do anything??
+                mesh.gameObject.layer = LayerMask.NameToLayer("Ignore Raycast B");
+                mesh.GetComponent<MeshRenderer>().SetMaterial(assets.Get<Material>("TokenGreen"));
+                return transform;
             })
             .Build().gameObject.AddComponent<TokenOutrunToken>();
         tokenOutrunToken.entity = tokenOutrunToken.GetComponent<Entity>();
-        tokenOutrunToken.audMan = tokenOutrunToken.gameObject.AddComponent<AudioManager>();
+        tokenOutrunToken.audMan = tokenOutrunToken.gameObject.AddComponent<PropagatedAudioManager>();
         tokenOutrunToken.audMan.audioDevice = tokenOutrunToken.gameObject.AddComponent<AudioSource>();
         tokenOutrunToken.audMan.audioDevice.dopplerLevel = 0f;
         tokenOutrunToken.audMan.audioDevice.spread = 0f;
@@ -1286,6 +1300,55 @@ This is actually an early access release...", false);
         }
 
         // Token Collector
+        TokenCollectorEvent collectorEvent = new RandomEventBuilder<TokenCollectorEvent>(Info)
+            .SetName("Event_TokenCollector")
+            .SetEnum("TokenCollector")
+            .SetMinMaxTime(120f, 141f)
+            .SetJingle(bonusJingle)
+            .SetSound(assets.Get<SoundObject>("GnatSwarm/Gnattack"))
+            .SetMeta(RandomEventFlags.Special)
+            .Build();
+        leftover = new GameObject("Token Collector Token");
+        leftover.ConvertToPrefab(true);
+        TokenCollectorToken tokenCollectorToken = leftover.AddComponent<TokenCollectorToken>();
+        tokenCollectorToken.audMan = tokenCollectorToken.gameObject.AddComponent<PropagatedAudioManager>();
+        tokenCollectorToken.audMan.audioDevice = tokenOutrunToken.gameObject.AddComponent<AudioSource>();
+        tokenCollectorToken.audMan.audioDevice.dopplerLevel = 0f;
+        tokenCollectorToken.audMan.audioDevice.spread = 0f;
+        tokenCollectorToken.audMan.audioDevice.spatialBlend = 1;
+        tokenCollectorToken.audMan.audioDevice.rolloffMode = AudioRolloffMode.Linear;
+        var collectorRender = new GameObject("Base");
+        collectorRender.transform.SetParent(tokenCollectorToken.transform, false);
+        tokenCollectorToken.render = Instantiate(tokenOutrunToken.render.GetChild(0), collectorRender.transform, false).GetComponent<Renderer>();
+        tokenCollectorToken.transform.localScale = Vector3.one * 3f;
+        var tokenCollider = tokenCollectorToken.gameObject.AddComponent<SphereCollider>();
+        tokenCollider.center = Vector3.zero;
+        tokenCollider.radius = 1.5f;
+        tokenCollider.isTrigger = true;
+        collectorEvent.tokenPre = tokenCollectorToken;
+        TokenCollectorEvent.tokenMaterialSets.AddRange(new()
+        {
+            { ItemMetaStorage.Instance.GetPointsObject(25, true), assets.Get<Material>("TokenGreen") },
+            { ItemMetaStorage.Instance.GetPointsObject(50, true), assets.Get<Material>("TokenSilver") },
+            { ItemMetaStorage.Instance.GetPointsObject(100, true), assets.Get<Material>("TokenGold") } 
+        });
+        collectorEvent.weightedYTPs.AddRange([
+            new WeightedItemObject()
+            {
+                selection = ItemMetaStorage.Instance.GetPointsObject(25, true),
+                weight = 150
+            },
+            new WeightedItemObject()
+            {
+                selection = ItemMetaStorage.Instance.GetPointsObject(50, true),
+                weight = 45
+            },
+            new WeightedItemObject()
+            {
+                selection = ItemMetaStorage.Instance.GetPointsObject(100, true),
+                weight = 5
+            }
+            ]);
 
         GeneratorManagement.Register(this, GenerationModType.Preparation, (title, num, scene) =>
         {
@@ -1399,6 +1462,11 @@ This is actually an early access release...", false);
                     {
                         selection = smasherEvent,
                         weight = 85
+                    },
+                    new()
+                    {
+                        selection = collectorEvent,
+                        weight = 9999 //100
                     }
                         ]);
                     }
@@ -1438,6 +1506,7 @@ This is actually an early access release...", false);
             mysteryEvent,
             tokenOutrunEvent,
             smasherEvent,
+            collectorEvent,
 
             timeoutShuffle
             ],
@@ -1457,6 +1526,7 @@ This is actually an early access release...", false);
                 "BonusMysteryEvent",
                 "TokenOutrun",
                 "UFOSmasher",
+                "TokenCollector",
 
                 "TimeOver/MissleShuffleChaos"
                 ]);
@@ -1536,6 +1606,7 @@ internal interface IEventSpawnPlacement
 }
 
 // Figured that this is easier than doing the same thing from Siege Cannon Cart.
+// Also the component exists in the Baldi Dev API but that does hacky things.
 public class CustomSpriteRotatorAnimator : CustomAnimatorMono<AnimatedSpriteRotator, CustomAnimation<Sprite>, Sprite>
 {
     public AnimatedSpriteRotator spriteRotator;
