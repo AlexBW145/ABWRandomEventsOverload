@@ -113,7 +113,7 @@ public class TokenOutrunToken : MonoBehaviour, IEntityTrigger
 
     public void EntityTriggerEnter(Collider other, bool validCollision)
     {
-        if (!gotTouched && other.isTrigger)
+        if (!gotTouched && other.isTrigger && validCollision)
         {
             if (other.CompareTag("Player"))
             {

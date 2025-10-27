@@ -46,15 +46,18 @@ public class TokenCollectorEvent : BonusEventBase // It's just like the gravity 
                 var transforms = new List<Transform>();
                 transforms.AddRange(ec.Npcs.Select(x => x?.transform));
                 transforms.AddRange(ec.Players.Select(x => x?.transform));
+                bool nearby = false;
                 foreach (var _transform in transforms)
                 {
                     if (_transform == null) continue;
-                    if (ec.GetDistance(cell, ec.CellFromPosition(_transform.position)) > minDistanceNotNeeded)
+                    if (ec.GetDistance(cell, ec.CellFromPosition(_transform.position)) <= minDistanceNotNeeded)
                     {
-                        tilesThatAreNotNear.Add(cell);
+                        nearby = true;
                         break;
                     }
                 }
+                if (nearby) continue;
+                tilesThatAreNotNear.Add(cell);
             }
             int num = crng.Next(minTokens, maxTokens);
             float timer = initialSpawnDelay;
