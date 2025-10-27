@@ -11,7 +11,6 @@ using MonoMod.Utils;
 using MTM101BaldAPI;
 using MTM101BaldAPI.AssetTools;
 using MTM101BaldAPI.Components;
-using MTM101BaldAPI.Components.Animation;
 using MTM101BaldAPI.ObjectCreation;
 using MTM101BaldAPI.PlusExtensions;
 using MTM101BaldAPI.Reflection;
@@ -24,6 +23,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using UnityEngine;
+using static TMPro.SpriteAssetUtilities.TexturePacker_JsonArray;
 
 namespace ABWEvents;
 
@@ -1249,12 +1249,12 @@ This is actually an early access release...", false);
         sheet.SetValue(ballRot, new SpriteRotationMap[] { rollerRotationMap });
         ballPrefab.animator = ballPrefab.gameObject.AddComponent<CustomSpriteRotatorAnimator>();
         ballPrefab.animator.spriteRotator = ballRot;
-        ballPrefab.animator.LoadAnimations(new Dictionary<string, SpriteAnimation>()
+        /*ballPrefab.animator.LoadAnimations(new Dictionary<string, SpriteAnimation>()
         {
             { "rolling", new SpriteAnimation(24, dir5.ToArray()) }
         });
-        ballPrefab.animator.timeScale = TimeScaleType.Environment;
-        //ballPrefab.animation = [.. dir5]; // The custom animation classes are not serialized tho...
+        ballPrefab.animator.timeScale = TimeScaleType.Environment;*/
+        ballPrefab.animation = [.. dir5]; // The custom animation classes are not serialized tho...
 
         _collisionLayerMask.SetValue(ballPrefab.entity, (LayerMask)LayerMask.GetMask("Default", "Ignore Raycast", "Ignore Raycast B", "Windows"));
 
@@ -1613,8 +1613,16 @@ internal interface IEventSpawnPlacement
 
 // Figured that this is easier than doing the same thing from Siege Cannon Cart.
 // Also the component exists in the Baldi Dev API but that does hacky things.
-public class CustomSpriteRotatorAnimator : CustomAnimator<SpriteAnimation, SpriteFrame, Sprite>
+/*public class CustomSpriteRotatorAnimator : CustomAnimator<SpriteAnimation, SpriteFrame, Sprite>
 {
     public AnimatedSpriteRotator spriteRotator;
     public override void ApplyFrame(Sprite frame) => spriteRotator.targetSprite = frame;
+}*/
+public class CustomSpriteRotatorAnimator : CustomAnimatorMono<AnimatedSpriteRotator, CustomAnimation<Sprite>, Sprite>
+{
+    public AnimatedSpriteRotator spriteRotator;
+
+    public override AnimatedSpriteRotator affectedObject { get => spriteRotator; set => spriteRotator = value; }
+
+    protected override void UpdateFrame() => spriteRotator.targetSprite = currentFrame.value;
 }
