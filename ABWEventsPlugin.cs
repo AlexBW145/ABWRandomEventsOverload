@@ -167,6 +167,7 @@ This is actually an early access release...", false);
                 {"Ed_RandomEvent_bonus_randomevent", "Mystery Event\nA random event will be summonned and will end by the time class is dismissed!\nRNG is dependent for this event."},
                 {"Ed_RandomEvent_bonus_tokenoutrun", "Token Outrun\nSome random guy appeared and is running away but is accidently dropping the tokens.\nEach token is worth 15 YTPs and will disappear quickly. The runner will also run away from the players so be quick!"},
                 {"Ed_RandomEvent_bonus_ufosmasher", "UFO Smasher\nA bunch of UFOs have appeared out of nowhere with randomized loot!\nSpiked balls will appear in random hallway positions and throwing enough of them will destroy the UFO!\nDropping its loot it has.\nSpiked balls can also be used against Baldi and him friends!"},
+                {"Ed_RandomEvent_bonus_tokencollector", "Token Collector\nRandom tokens have appeared out of nowhere and will disappear soon.\nTokens are valued by each existing YTP items, other characters can collect the tokens."},
 
                 { "Ed_Tool_gnatswarm_placement_Title", "Gnat House" },
                 { "Ed_Tool_gnatswarm_placement_Desc", "Houses a bunch of gnats." },
