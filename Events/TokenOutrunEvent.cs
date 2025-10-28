@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MTM101BaldAPI.Components;
+using System;
 using System.Collections;
 using System.Linq;
 using UnityEngine;
@@ -26,7 +27,7 @@ public class TokenOutrunEvent : BonusEventBase
 public class TokenOutrunToken : MonoBehaviour, IEntityTrigger
 {
     [SerializeField] internal Entity entity;
-    [SerializeField] internal int ytps = 15;
+    [SerializeField] internal int ytps = 25;
     [SerializeField] internal SoundObject collected;
     [SerializeField] internal AudioManager audMan;
     [SerializeField] internal float startHeight = 6f, endHeight = 0.5f, gravity = 25f;
@@ -152,10 +153,15 @@ public class TokenOutrunGuy : NPC
 {
     [SerializeField] internal TokenOutrunToken tokenPrefab;
     private float timer = 0.15f;
+    [SerializeField] internal Sprite[] animation;
+    [SerializeField] internal CustomSpriteRotatorAnimator animator;
 
     public override void Initialize()
     {
         base.Initialize();
+        animator.animations.Add("running", new CustomAnimation<Sprite>(24, animation.ToArray()));
+        //animator.ec = pm.ec;
+        animator.SetDefaultAnimation("running", 1f);
         navigator.SetSpeed(35f);
         navigator.maxSpeed = 50f;
         behaviorStateMachine.ChangeState(new TokenOutrunGuy_Active(this));

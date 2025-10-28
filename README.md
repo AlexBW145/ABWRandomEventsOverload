@@ -6,7 +6,7 @@ A Baldi's Basics Plus mod that self-inserts four new events into the game, with 
 - Made the mod
 - Coded the events in sight
 - Also coded the implemention of CRAZY and bonus events
-- Made models for UFOs, Spiked Balls, Gnat Houses, and Traffic Trouble Cars.
+- Made models for UFOs, Spiked Balls, Token Thief, Gnat Houses, Traffic Trouble Cars, and Token Outrun + Token Collector tokens.
 * ### B-Side Skid (on Gamebanana)
 - Traffic Trouble road assets before they were modified.
 * ### PixelGuy

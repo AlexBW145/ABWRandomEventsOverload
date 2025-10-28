@@ -439,6 +439,13 @@ This is actually an early access release...", false);
                 "UFOSmasher/Dir8",
                 ]);
         #endregion
+        #region TOKEN OUTRUN THIEF
+        float theifSize = 32f;
+        assets.AddRange([
+            AssetLoader.SpritesFromSpritesheet(7, 1, theifSize, Vector2.one / 2f, AssetLoader.TextureFromMod(this, "Texture2D", "TokenOutrun", "TOThiefBack.png")),
+            AssetLoader.SpritesFromSpritesheet(7, 1, theifSize, Vector2.one / 2f, AssetLoader.TextureFromMod(this, "Texture2D", "TokenOutrun", "TOThiefFront.png")),
+            ], ["TokenOutrun/ThiefBackfacing", "TokenOutrun/ThiefFrontfacing"]);
+        #endregion
         #region MODELS
         var elv0 = Resources.FindObjectsOfTypeAll<Material>().Last(x => x.name == "El4"); // I AM ALMOST AT MY LIMIT, TILEBASE MATERIAL USES A DIFFERENT SHADER.
         var ufo = AssetLoader.ModelFromMod(this, "Models", "UFOSmashable.obj");
@@ -1148,7 +1155,29 @@ This is actually an early access release...", false);
             .DisableNavigationPrecision()
             .IgnorePlayerOnSpawn()
             .EnableAcceleration()
+            .SetMaxSightDistance(1000f)
             .Build();
+        var theifRot = guy.gameObject.AddComponent<AnimatedSpriteRotator>();
+        _renderer.SetValue(theifRot, guy.spriteRenderer[0]);
+        SpriteRotationMap theifRotationMap = new SpriteRotationMap()
+        {
+            angleCount = 2,
+        };
+        var front = assets.Get<Sprite[]>("TokenOutrun/ThiefFrontfacing"); // Front facing, used for the animator.
+        var back = assets.Get<Sprite[]>("TokenOutrun/ThiefBackfacing");
+        List<Sprite> theifSprites = new List<Sprite>();
+        for (int i = 0; i < 6; i++)
+        {
+            theifSprites.AddRange([
+                front[i], // Two sides??
+                back[i]
+                ]);
+        }
+        _spriteSheet.SetValue(theifRotationMap, theifSprites.ToArray());
+        sheet.SetValue(theifRot, new SpriteRotationMap[] { theifRotationMap });
+        guy.animator = guy.gameObject.AddComponent<CustomSpriteRotatorAnimator>();
+        guy.animator.spriteRotator = theifRot;
+        guy.animation = [.. front];
         tokenOutrunEvent.guyPrefab = guy;
         TokenOutrunToken tokenOutrunToken = new EntityBuilder()
             .SetName("Token Outrun Token")
