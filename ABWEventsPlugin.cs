@@ -440,7 +440,7 @@ This is actually an early access release...", false);
                 ]);
         #endregion
         #region TOKEN OUTRUN THIEF
-        float theifSize = 32f;
+        float theifSize = 25f;
         assets.AddRange([
             AssetLoader.SpritesFromSpritesheet(7, 1, theifSize, Vector2.one / 2f, AssetLoader.TextureFromMod(this, "Texture2D", "TokenOutrun", "TOThiefBack.png")),
             AssetLoader.SpritesFromSpritesheet(7, 1, theifSize, Vector2.one / 2f, AssetLoader.TextureFromMod(this, "Texture2D", "TokenOutrun", "TOThiefFront.png")),
@@ -1178,6 +1178,7 @@ This is actually an early access release...", false);
         guy.animator = guy.gameObject.AddComponent<CustomSpriteRotatorAnimator>();
         guy.animator.spriteRotator = theifRot;
         guy.animation = [.. front];
+        guy.spriteRenderer[0].transform.localPosition = Vector3.down * 0.3f;
         tokenOutrunEvent.guyPrefab = guy;
         TokenOutrunToken tokenOutrunToken = new EntityBuilder()
             .SetName("Token Outrun Token")

@@ -52,7 +52,7 @@ internal static class StudioAdds
             { "hyper_traffictrouble", ABWEventsPlugin.assets.Get <Sprite>("traffictrouble") },
 
             { "bonus_randomevent", ABWEventsPlugin.assets.Get<Sprite>("bonus_randomevent") },
-            { "bonus_tokenoutrun", placeholdsprite },
+            { "bonus_tokenoutrun", ABWEventsPlugin.assets.Get<Sprite>("bonus_tokenoutrun") },
             { "bonus_ufosmasher", ABWEventsPlugin.assets.Get<Sprite>("bonus_ufosmasher") },
             { "bonus_tokencollector", ABWEventsPlugin.assets.Get<Sprite>("bonus_tokencollector") }
         });
