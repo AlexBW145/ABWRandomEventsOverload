@@ -57,9 +57,9 @@ public class ABWEventsPlugin : BaseUnityPlugin
         LoadingEvents.RegisterOnAssetsLoaded(Info, PostLoad(), LoadingEventOrder.Post);
         LoadingEvents.RegisterOnAssetsLoaded(Info, FinalLoad, LoadingEventOrder.Final);
         ModdedSaveGame.AddSaveHandler(new ABWEventsOverloadSaveIO());
-        MTM101BaldiDevAPI.AddWarningScreen(@"This ABW's Events Overload build is given out to a discord server and some people.
+        /*MTM101BaldiDevAPI.AddWarningScreen(@"This ABW's Events Overload build is given out to a discord server and some people.
 
-This is actually an early access release...", false);
+This is actually an early access release...", false);*/
     }
 
     private void FinalLoad()
@@ -165,7 +165,7 @@ This is actually an early access release...", false);
                 {"Ed_RandomEvent_hyper_traffictrouble", "<color=#FF0200>C</color><color=#26FF2B>R</color><color=#2412FB>A</color><color=#FEFE2B>Z</color><color=#D987FF>Y</color> Traffic Trouble\nThe drivers has gone crazy and more of them kept on appearing into the traffic scene!\nDrivers will have increased speed, less spawn cooldown, and will terrorize the super schoolhouse!"},
 
                 {"Ed_RandomEvent_bonus_randomevent", "Mystery Event\nA random event will be summonned and will end by the time class is dismissed!\nRNG is dependent for this event."},
-                {"Ed_RandomEvent_bonus_tokenoutrun", "Token Outrun\nSome random guy appeared and is running away but is accidently dropping the tokens.\nEach token is worth 15 YTPs and will disappear quickly. The runner will also run away from the players so be quick!"},
+                {"Ed_RandomEvent_bonus_tokenoutrun", "Token Outrun\nSome random guy appeared with stolen YTP tokens and is running away but is accidently dropping the tokens.\nEach token is worth 15 YTPs and will disappear quickly. The runner will also run away from the players so be quick!"},
                 {"Ed_RandomEvent_bonus_ufosmasher", "UFO Smasher\nA bunch of UFOs have appeared out of nowhere with randomized loot!\nSpiked balls will appear in random hallway positions and throwing enough of them will destroy the UFO!\nDropping its loot it has.\nSpiked balls can also be used against Baldi and him friends!"},
                 {"Ed_RandomEvent_bonus_tokencollector", "Token Collector\nRandom tokens have appeared out of nowhere and will disappear soon.\nTokens are valued by each existing YTP items, other characters can collect the tokens."},
 
@@ -1434,6 +1434,7 @@ This is actually an early access release...", false);
         {
             foreach (var level in scene.GetCustomLevelObjects())
             {
+                if (level.IsModifiedByMod(Info)) continue;
                 level.SetCustomModValue(Info, "hyper_events", new List<HyperEventSelection>());
                 level.SetCustomModValue(Info, "hyper_event_chance", 0.055f);
                 level.SetCustomModValue(Info, "bonus_events", new List<WeightedRandomEvent>());
@@ -1484,7 +1485,7 @@ This is actually an early access release...", false);
                     level.SetCustomModValue(Info, "hyper_event_chance", 0.15f);
                 else if (title == "F5" && num == 4)
                     level.SetCustomModValue(Info, "hyper_event_chance", 0.25f);
-                else if (title == "END")
+                else if (title == "END" && !level.IsModifiedByMod(Info))
                     level.SetCustomModValue(Info, "hyper_event_chance", 0.1f);
                 else if (title == "INF")
                     level.SetCustomModValue(Info, "hyper_event_chance", 0.205f);
