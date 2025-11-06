@@ -142,7 +142,7 @@ public class TrafficTroubleEvent : RandomEvent
             }
             list[i].Value.Item1.SetMaterial(roads[createdRoads[list[i].Key].Item2]);
         }
-        //TempOpen();
+        ec.TempCloseBully();
     }
 
     internal class TunnelPlacement : TileBasedObject, IEventSpawnPlacement
@@ -279,7 +279,7 @@ public class TrafficTroubleEvent : RandomEvent
             }
             list[i].Value.Item1.SetMaterial(roads[createdRoads[list[i].Key].Item2]);
         }
-        //TempOpen();
+        ec.TempCloseBully();
     }
 
     int roomId = 0;

@@ -1108,7 +1108,7 @@ This is actually an early access release...", false);*/
         modescene.randomizedLevelObject = levels.ToArray();
         //
         modescene.MarkAsNeverUnload();
-        modescene.AddMeta(this, ["missleshuffle"]);
+        modescene.AddMeta(this, ["missleshuffle", "found_on_main"]);
         GeneratorManagement.EnqueueGeneratorChanges(modescene);
 
         var timeoutShuffle = new RandomEventBuilder<TimeOut_Shuffle>(Info)
