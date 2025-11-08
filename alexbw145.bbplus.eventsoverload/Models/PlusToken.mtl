@@ -1,4 +1,4 @@
-# Blender 4.5.3 LTS MTL File: 'PlusToken.blend'
+# Blender 4.5.4 LTS MTL File: 'PlusToken.blend'
 # www.blender.org
 
 newmtl Material
@@ -9,4 +9,4 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd D:/source/repos/ABWRandomEventsOverload/TokenUV.png
+map_Kd D:/source/repos/ABWRandomEventsOverload/Source/TokenUV.png
