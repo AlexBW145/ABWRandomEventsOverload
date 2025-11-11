@@ -11,6 +11,7 @@ using MonoMod.Utils;
 using MTM101BaldAPI;
 using MTM101BaldAPI.AssetTools;
 using MTM101BaldAPI.Components;
+using MTM101BaldAPI.Components.Animation;
 using MTM101BaldAPI.ObjectCreation;
 using MTM101BaldAPI.PlusExtensions;
 using MTM101BaldAPI.Reflection;
@@ -27,14 +28,14 @@ using UnityEngine;
 namespace ABWEvents;
 
 [BepInPlugin(PLUGIN_GUID, PLUGIN_NAME, PLUGIN_VERSION)]
-[BepInDependency("mtm101.rulerp.bbplus.baldidevapi", "9.1.0.0")]
+[BepInDependency("mtm101.rulerp.bbplus.baldidevapi", "10.0.0")]
 [BepInDependency("mtm101.rulerp.baldiplus.levelstudioloader", BepInDependency.DependencyFlags.SoftDependency)]
 [BepInDependency("mtm101.rulerp.baldiplus.levelstudio", BepInDependency.DependencyFlags.SoftDependency)]
 public class ABWEventsPlugin : BaseUnityPlugin
 {
     internal const string PLUGIN_GUID = "alexbw145.bbplus.eventsoverload";
     private const string PLUGIN_NAME = "AlexBW145's Events Overload";
-    private const string PLUGIN_VERSION = "1.0.1";
+    private const string PLUGIN_VERSION = "1.0.2";
 
     internal static new ManualLogSource Logger;
     internal static AssetManager assets = new AssetManager();
@@ -471,7 +472,10 @@ This is actually an early access release...", false);*/
         var moderateToken = Instantiate(elv0);
         moderateToken.name = "YTPTokenSilver";
         moderateToken.SetMainTexture(AssetLoader.TextureFromMod(this, "Models", "PlusTokenSilver.png"));
-        assets.AddRange([basicToken,  moderateToken, baseToken], ["TokenGreen", "TokenSilver", "TokenGold"]);
+        var coolToken = Instantiate(elv0);
+        coolToken.name = "YTPTokenDiamond";
+        coolToken.SetMainTexture(AssetLoader.TextureFromMod(this, "Models", "PlusTokenDiamond.png"));
+        assets.AddRange([basicToken,  moderateToken, baseToken, coolToken], ["TokenGreen", "TokenSilver", "TokenGold", "TokenDiamond"]);
         token.transform.GetChild(0).GetComponent<Renderer>().SetMaterial(baseToken);
         assets.Add("TokenModel", token);
         #endregion
@@ -1177,7 +1181,11 @@ This is actually an early access release...", false);*/
         sheet.SetValue(theifRot, new SpriteRotationMap[] { theifRotationMap });
         guy.animator = guy.gameObject.AddComponent<CustomSpriteRotatorAnimator>();
         guy.animator.spriteRotator = theifRot;
-        guy.animation = [.. front];
+        guy.animator.LoadAnimations(new Dictionary<string, SpriteAnimation>()
+        {
+            { "running", new SpriteAnimation(24, front) }
+        });
+        guy.animator.timeScale = TimeScaleType.Npc;
         guy.spriteRenderer[0].transform.localPosition = Vector3.down * 0.3f;
         tokenOutrunEvent.guyPrefab = guy;
         TokenOutrunToken tokenOutrunToken = new EntityBuilder()
@@ -1303,12 +1311,11 @@ This is actually an early access release...", false);*/
         sheet.SetValue(ballRot, new SpriteRotationMap[] { rollerRotationMap });
         ballPrefab.animator = ballPrefab.gameObject.AddComponent<CustomSpriteRotatorAnimator>();
         ballPrefab.animator.spriteRotator = ballRot;
-        /*ballPrefab.animator.LoadAnimations(new Dictionary<string, SpriteAnimation>()
+        ballPrefab.animator.LoadAnimations(new Dictionary<string, SpriteAnimation>()
         {
             { "rolling", new SpriteAnimation(24, dir5.ToArray()) }
         });
-        ballPrefab.animator.timeScale = TimeScaleType.Environment;*/
-        ballPrefab.animation = [.. dir5]; // The custom animation classes are not serialized tho...
+        ballPrefab.animator.timeScale = TimeScaleType.Environment;
 
         _collisionLayerMask.SetValue(ballPrefab.entity, (LayerMask)LayerMask.GetMask("Default", "Ignore Raycast", "Ignore Raycast B", "Windows"));
 
@@ -1390,7 +1397,8 @@ This is actually an early access release...", false);*/
         {
             { ItemMetaStorage.Instance.GetPointsObject(25, true), assets.Get<Material>("TokenGreen") },
             { ItemMetaStorage.Instance.GetPointsObject(50, true), assets.Get<Material>("TokenSilver") },
-            { ItemMetaStorage.Instance.GetPointsObject(100, true), assets.Get<Material>("TokenGold") } 
+            { ItemMetaStorage.Instance.GetPointsObject(100, true), assets.Get<Material>("TokenGold") },
+            { ItemMetaStorage.Instance.GetPointsObject(250, true), assets.Get<Material>("TokenDiamond") }
         });
         collectorEvent.weightedYTPs.AddRange([
             new WeightedItemObject()
@@ -1407,6 +1415,11 @@ This is actually an early access release...", false);*/
             {
                 selection = ItemMetaStorage.Instance.GetPointsObject(100, true),
                 weight = 10
+            },
+            new WeightedItemObject()
+            {
+                selection = ItemMetaStorage.Instance.GetPointsObject(250, true),
+                weight = 5
             }
             ]);
 
@@ -1668,16 +1681,9 @@ internal interface IEventSpawnPlacement
 
 // Figured that this is easier than doing the same thing from Siege Cannon Cart.
 // Also the component exists in the Baldi Dev API but that does hacky things.
-/*public class CustomSpriteRotatorAnimator : CustomAnimator<SpriteAnimation, SpriteFrame, Sprite>
+[Serializable]
+public class CustomSpriteRotatorAnimator : CustomAnimator<SpriteAnimation, SpriteFrame, Sprite>
 {
     public AnimatedSpriteRotator spriteRotator;
     public override void ApplyFrame(Sprite frame) => spriteRotator.targetSprite = frame;
-}*/
-public class CustomSpriteRotatorAnimator : CustomAnimatorMono<AnimatedSpriteRotator, CustomAnimation<Sprite>, Sprite>
-{
-    public AnimatedSpriteRotator spriteRotator;
-
-    public override AnimatedSpriteRotator affectedObject { get => spriteRotator; set => spriteRotator = value; }
-
-    protected override void UpdateFrame() => spriteRotator.targetSprite = currentFrame.value;
 }

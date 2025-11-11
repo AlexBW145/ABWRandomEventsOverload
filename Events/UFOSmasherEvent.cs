@@ -201,7 +201,6 @@ public class ITM_SpikedBall : Item, IEntityTrigger
     private float time = 9f;
     private bool outOfPlayerCol = false;
     public CustomSpriteRotatorAnimator animator;
-    [SerializeField] internal List<Sprite> animation = new List<Sprite>();
 
     public void EntityTriggerEnter(Collider other, bool validCollision)
     {
@@ -253,8 +252,7 @@ public class ITM_SpikedBall : Item, IEntityTrigger
 
     public override bool Use(PlayerManager pm)
     {
-        animator.animations.Add("rolling", new CustomAnimation<Sprite>(24, animation.ToArray()));
-        //animator.ec = pm.ec;
+        animator.ec = pm.ec;
         animator.SetDefaultAnimation("rolling", 1f);
         ec = pm.ec;
         transform.position = pm.transform.position;

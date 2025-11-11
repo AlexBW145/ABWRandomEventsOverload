@@ -159,8 +159,7 @@ public class TokenOutrunGuy : NPC
     public override void Initialize()
     {
         base.Initialize();
-        animator.animations.Add("running", new CustomAnimation<Sprite>(24, animation.ToArray()));
-        //animator.ec = pm.ec;
+        animator.ec = ec;
         animator.SetDefaultAnimation("running", 1f);
         navigator.SetSpeed(35f);
         navigator.maxSpeed = 50f;

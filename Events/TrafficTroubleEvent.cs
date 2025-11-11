@@ -155,7 +155,7 @@ public class TrafficTroubleEvent : RandomEvent
             var traffictrouble = (TrafficTroubleEvent)_event;
             var pos = GetCellPos(traffictrouble.ec).position;
             var oppositeDirection = direction.GetOpposite();
-            if (!GetCellPos(traffictrouble.ec).Null) // Studio users try not to leave a placement with a initalized cell behind it.
+            if (!traffictrouble.ec.ContainsCoordinates(pos + oppositeDirection.ToIntVector2()) || !traffictrouble.ec.CellFromPosition(pos + oppositeDirection.ToIntVector2()).Null) // Studio users try not to leave a placement with a initalized cell behind it.
             {
                 Destroy(gameObject);
                 return;

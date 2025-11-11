@@ -150,7 +150,7 @@ class GeneratorPatches
     [HarmonyPatch(typeof(GameInitializer), nameof(GameInitializer.Initialize)), HarmonyPrefix]
     static void MissleModeAssign()
     {
-        if (CoreGameManager.Instance.sceneObject.levelTitle == "F5" && CoreGameManager.Instance.sceneObject.levelNo == 4
+        if (CoreGameManager.Instance.sceneObject.name == "MainLevel_5"
             && new System.Random(CoreGameManager.Instance.Seed() + CoreGameManager.Instance.sceneObject.levelNo).NextDouble() < (double)0.1f) // 10% chance for doomsday
             CoreGameManager.Instance.sceneObject = missleShuffleObject;
     }

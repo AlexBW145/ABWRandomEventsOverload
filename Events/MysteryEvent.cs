@@ -10,8 +10,9 @@ namespace ABWEvents.Events;
 public class MysteryEvent : BonusEventBase
 {
     private RandomEventMetadata[] eventsPossible;
-    private static FieldInfo _eventTime = AccessTools.DeclaredField(typeof(RandomEvent), "eventTime");
-    private static FieldInfo ecEvents = AccessTools.DeclaredField(typeof(EnvironmentController), "events");
+    private static FieldInfo 
+        _eventTime = AccessTools.DeclaredField(typeof(RandomEvent), "eventTime"),
+        ecEvents = AccessTools.DeclaredField(typeof(EnvironmentController), "events");
 
     public override void Initialize(EnvironmentController controller, Random rng)
     {

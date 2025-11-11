@@ -132,31 +132,27 @@ public class MissleStrikeShuffleGameManager : BaseGameManager
 
     public override void LoadNextLevel()
     {
-        HighlightManager.Instance.Highlight("steam_completed", LocalizationManager.Instance.GetLocalizedText("Steam_Highlight_Win"), string.Format(LocalizationManager.Instance.GetLocalizedText("Steam_Highlight_Win_Desc"), CurrentLevel + 1), 2u, 0f, 0f, TimelineEventClipPriority.Standard);
+        HighlightManager.Instance.Highlight("steam_completed", LocalizationManager.Instance.GetLocalizedText("Steam_Highlight_Win"), string.Format(LocalizationManager.Instance.GetLocalizedText("Steam_Highlight_Win_Desc"), base.CurrentLevel + 1), 2u, 0f, 0f, TimelineEventClipPriority.Standard);
+        int stickerBonuses = CoreGameManager.Instance.GetStickerBonuses(ec.RemainingTime, (ec.GetBaldi() != null) ? ec.NavigableDistance(ec.CellFromPosition(CoreGameManager.Instance.GetPlayer(0).transform.position), ec.CellFromPosition(ec.GetBaldi().transform.position), PathType.Nav) : 0, ec.map.PlayerDiscoveredCells);
+        CoreGameManager.Instance.AddPoints(stickerBonuses, 0, playAnimation: false, includeInLevelTotal: false, multiply: true);
         CoreGameManager.Instance.saveMapAvailable = false;
+        CoreGameManager.Instance.saveMapPurchased = false;
         for (int i = 0; i < 2 - CoreGameManager.Instance.Attempts; i++)
-        {
-            CoreGameManager.Instance.AddPoints(CoreGameManager.Instance.GetPointsThisLevel(0), 0, false, false);
-        }
+            CoreGameManager.Instance.AddPoints(CoreGameManager.Instance.GetPointsThisLevel(0), 0, playAnimation: false, includeInLevelTotal: false, multiply: false);
 
         PrepareToLoad();
         elevatorScreen = Object.Instantiate(elevatorScreenPre);
         elevatorScreen.OnLoadReady += base.LoadNextLevel;
         elevatorScreen.Initialize();
-        int num = 0;
         if (time <= levelObject.timeBonusLimit)
-        {
-            num = levelObject.timeBonusVal;
-        }
+            _ = levelObject.timeBonusVal;
 
         if (problems > 0)
-        {
             CoreGameManager.Instance.GradeVal += -Mathf.RoundToInt(gradeValue * ((float)correctProblems / (float)problems * 2f - 1f));
-        }
 
-        CoreGameManager.Instance.AddPoints(num, 0, playAnimation: false, includeInLevelTotal: false);
-        CoreGameManager.Instance.AwardGradeBonus();
-        elevatorScreen.ShowResults(time, num);
+        elevatorScreen.ShowResults(time, Mathf.RoundToInt((float)stickerBonuses * Singleton<CoreGameManager>.Instance.YtpMultiplier));
+        if (CoreGameManager.Instance.GetPoints(0) > 0)
+            _ = levelObject.finalLevel;
     }
 
     protected override void LoadSceneObject(SceneObject sceneObject, bool restarting)
