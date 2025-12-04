@@ -51,7 +51,7 @@ class GeneratorPatches
                 if (ld.GetCustomModValue(ABWEventsPlugin.PLUGIN_GUID, "hyper_events") != null && ld.GetCustomModValue(ABWEventsPlugin.PLUGIN_GUID, "hyper_event_chance") != null)
                 {
                     List<HyperEventSelection> hypers = ld.GetCustomModValue(ABWEventsPlugin.PLUGIN_GUID, "hyper_events") as List<HyperEventSelection>;
-                    if (hypers.Count != 0)
+                    if ((hypers?.Count ?? 0) != 0)
                     {
                         for (int i = 0; i < eventsToLaunch.Count; i++)
                         {
@@ -70,7 +70,7 @@ class GeneratorPatches
                 if (ld.GetCustomModValue(ABWEventsPlugin.PLUGIN_GUID, "bonus_events") != null)
                 {
                     List<WeightedRandomEvent> bonuses = ld.GetCustomModValue(ABWEventsPlugin.PLUGIN_GUID, "bonus_events") as List<WeightedRandomEvent>;
-                    if (bonuses.Count != 0)
+                    if ((bonuses?.Count ?? 0) != 0)
                     {
                         RandomEvent randomEvent = WeightedSelection<RandomEvent>.ControlledRandomSelectionList(WeightedRandomEvent.Convert(bonuses), __instance.controlledRNG);
                         ld.SetCustomModValue(ABWEventsPlugin.PLUGIN_GUID, "bonus_event_selected", randomEvent);

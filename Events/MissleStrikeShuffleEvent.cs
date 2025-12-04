@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.AI;
 
 namespace ABWEvents.Events;
 
@@ -211,7 +212,8 @@ public class MissleStrikeImpact : MonoBehaviour
 {
     [SerializeField] internal AudioManager audMan;
     [SerializeField] internal SoundObject incomingPre, incoming, explosion;
-    [SerializeField] internal GameObject indication, impact, rocket;
+    [SerializeField] internal GameObject indication, impact, rocket, explodedPre;
+    private CapsuleCollider trigger;
     private EnvironmentController ec;
     private bool Active => ec != null;
 
@@ -228,9 +230,11 @@ public class MissleStrikeImpact : MonoBehaviour
     {
         this.ec = ec;
         audMan.PlaySingle(incomingPre);
+        trigger = GetComponent<CapsuleCollider>();
         StartCoroutine(Incoming());
     }
 
+    private readonly HashSet<Collider> onceOnly = new HashSet<Collider>();
     private void Update()
     {
         if (Active)
@@ -238,13 +242,31 @@ public class MissleStrikeImpact : MonoBehaviour
             if (indication.activeSelf)
                 indication.transform.Rotate((Vector3.down * 210f) * (Time.deltaTime * ec.EnvironmentTimeScale), Space.Self);
             else if (impact.activeSelf)
+            {
                 impact.transform.Rotate((Vector3.up * 90f) * (Time.deltaTime * ec.EnvironmentTimeScale), Space.Self);
+                var direction = new Vector3() { [trigger.direction] = 1 };
+                var offset = trigger.height / 2 - trigger.radius; // Mathing I should point out.
+                var p1 = transform.TransformPoint(trigger.center - direction * offset);
+                var p2 = transform.TransformPoint(trigger.center + direction * offset);
+                var r = transform.TransformVector(trigger.radius, trigger.radius, trigger.radius);
+                var radius = Enumerable.Range(0, 3).Select(xyz => xyz == trigger.direction ? 0 : r[xyz]).Select(Mathf.Abs).Max();
+                var collision = Physics.OverlapCapsule(p1, p2, radius, triggerLayerMask, QueryTriggerInteraction.Collide);
+                foreach (var other in collision)
+                {
+                    if (other.CompareTag("StandardDoor"))
+                        other.GetComponent<StandardDoor>()?.OpenTimed(5f, false);
+                    else if (!onceOnly.Contains(other) && other.CompareTag("Window"))
+                    {
+                        onceOnly.Add(other);
+                        other.GetComponent<Window>()?.Break(true);
+                    }
+                }
+            }
         }
     }
 
     private IEnumerator Incoming()
     {
-        var trigger = GetComponent<Collider>();
         trigger.enabled = false;
         float time = 0.9f;
         while (time > 0f)
@@ -272,6 +294,21 @@ public class MissleStrikeImpact : MonoBehaviour
             yield return null;
         }
         indication.SetActive(false);
+        var oopsAllCollision = Physics.OverlapSphere(new(transform.position.x, 0f, transform.position.z), 3f, triggerLayerMask, QueryTriggerInteraction.Collide);
+        foreach (var collided in oopsAllCollision)
+            if (collided.GetComponent<Entity>() != null)
+                collided.GetComponent<Entity>().Squish(9f);
+        oopsAllCollision = Physics.OverlapSphere(new(transform.position.x, 5f, transform.position.z), 3f, collisionLayerMask, QueryTriggerInteraction.Ignore);
+        foreach (var collided in oopsAllCollision)
+            if (collided.GetComponent<NavMeshObstacle>() != null) // This seems dangerous...
+            {
+                Instantiate(explodedPre, collided.transform.position, default, null).transform.localScale = collided.transform.localScale;
+                var cell = ec.CellFromPosition(collided.transform.position);
+                var renderContainer = collided.GetComponent<RendererContainer>();
+                if (renderContainer && renderContainer.renderers.Any(r => cell.renderers.Contains(r)))
+                    cell.renderers.RemoveAll(x => renderContainer.renderers.Contains(x));
+                Destroy(collided.gameObject);
+            }
         rocket.SetActive(false);
         impact.SetActive(true);
         trigger.enabled = true;
@@ -309,22 +346,17 @@ public class MissleStrikeImpact : MonoBehaviour
         yield break;
     }
 
-    private static LayerMask triggerLayerMask = 5191680;
+    private static LayerMask triggerLayerMask = LayerMask.GetMask("Default", "Windows");
+    private static LayerMask collisionLayerMask = LayerMask.GetMask("Ignore Raycast");
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.CompareTag("Window")) // Ignore Raycast B does not collide with windows, which can piss me off and confuse me sometimes.
-            other.GetComponent<Window>()?.Break(true);
-        if (((1 << other.gameObject.layer) & (int)triggerLayerMask) == 0)
-            return;
         if (other.CompareTag("Player"))
             ec.AddFog(fog);
     }
 
     private void OnTriggerExit(Collider other)
     {
-        if (((1 << other.gameObject.layer) & (int)triggerLayerMask) == 0)
-            return;
         if (other.CompareTag("Player"))
             ec.RemoveFog(fog);
     }
@@ -333,10 +365,6 @@ public class MissleStrikeImpact : MonoBehaviour
 
     private void OnTriggerStay(Collider other)
     {
-        if (other.CompareTag("StandardDoor")) // Ignore Raycast B does not collide with doors, which can piss me off and confuse me sometimes.
-            other.GetComponent<StandardDoor>()?.OpenTimed(5f, false);
-        if (((1 << other.gameObject.layer) & (int)triggerLayerMask) == 0)
-            return;
         if (MissleStrikeShuffleEvent.Instance.isMode && other.CompareTag("Player"))
             MissleStrikeShuffleEvent.Instance.InRadius();
         else if (other.GetComponent<Entity>() != null)

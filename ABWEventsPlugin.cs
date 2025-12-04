@@ -35,7 +35,7 @@ public class ABWEventsPlugin : BaseUnityPlugin
 {
     internal const string PLUGIN_GUID = "alexbw145.bbplus.eventsoverload";
     private const string PLUGIN_NAME = "AlexBW145's Events Overload";
-    private const string PLUGIN_VERSION = "1.0.2";
+    private const string PLUGIN_VERSION = "1.0.3";
 
     internal static new ManualLogSource Logger;
     internal static AssetManager assets = new AssetManager();
@@ -941,6 +941,7 @@ This is actually an early access release...", false);*/
         strike.audMan.audioDevice.maxDistance = 200;
         strike.audMan.audioDevice.dopplerLevel = 0;
         strike.audMan.audioDevice.spread = 0;
+        strike.explodedPre = Resources.FindObjectsOfTypeAll<QuickExplosion>().Last(x => x.name == "QuickExplosion").gameObject;
 
         strike.indication = new GameObject("Indication", typeof(MeshFilter), typeof(MeshRenderer));
         strike.indication.transform.SetParent(strike.transform, false);
@@ -1092,6 +1093,7 @@ This is actually an early access release...", false);*/
         modescene.mapPrice = Resources.FindObjectsOfTypeAll<SceneObject>().Last(x => x.levelTitle == "F5").mapPrice;
         modescene.nextLevel = Resources.FindObjectsOfTypeAll<SceneObject>().Last(x => x.levelTitle == "F5").nextLevel;
         modescene.shopItems = (WeightedItemObject[])Resources.FindObjectsOfTypeAll<SceneObject>().Last(x => x.levelTitle == "F5").shopItems.Clone();
+        modescene.potentialStickers = (WeightedSticker[])Resources.FindObjectsOfTypeAll<SceneObject>().Last(x => x.levelTitle == "F5").potentialStickers.Clone();
         // Assigning base because why the fuck is Criminal Pack being executed first?
         var level3 = Resources.FindObjectsOfTypeAll<SceneObject>().Last(x => x.levelTitle == "F3");
         var level5 = Resources.FindObjectsOfTypeAll<SceneObject>().Last(x => x.levelTitle == "F5");

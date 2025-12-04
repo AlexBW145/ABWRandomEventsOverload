@@ -145,7 +145,7 @@ public class TokenCollectorToken : MonoBehaviour
         transform.Rotate((Vector3.down * 25f) * Time.deltaTime * (float)Math.PI * 2f, Space.World);
     }
 
-    private void OnTriggerEnter(Collider other)
+    private void OnTriggerStay(Collider other)
     {
         if (_event != null && !IsDespawning && other.isTrigger)
         {
