@@ -29,6 +29,9 @@
     <Reference Include="Assembly-CSharp">
       <HintPath>..\..\..\SteamLibrary\steamapps\common\Baldi's Basics Plus\BALDI_Data\Managed\Assembly-CSharp.dll</HintPath>
     </Reference>
+    <Reference Include="BaldiPlusArcade">
+      <HintPath>..\..\..\SteamLibrary\steamapps\common\Baldi's Basics Plus\BepInEx\plugins\BaldiPlusArcade.dll</HintPath>
+    </Reference>
     <Reference Include="MTM101BaldAPI">
       <HintPath>..\..\..\SteamLibrary\steamapps\common\Baldi's Basics Plus\BepInEx\plugins\MTM101BaldAPI.dll</HintPath>
     </Reference>

@@ -1,4 +1,5 @@
-﻿using ABWEvents.Events;
+﻿using ABWEvents.ArcadeEternity;
+using ABWEvents.Events;
 using ABWEvents.LevelStudio;
 using ABWEvents.LevelStudioLoader;
 using ABWEvents.Patches;
@@ -31,6 +32,7 @@ namespace ABWEvents;
 [BepInDependency("mtm101.rulerp.bbplus.baldidevapi", "10.0.0")]
 [BepInDependency("mtm101.rulerp.baldiplus.levelstudioloader", BepInDependency.DependencyFlags.SoftDependency)]
 [BepInDependency("mtm101.rulerp.baldiplus.levelstudio", BepInDependency.DependencyFlags.SoftDependency)]
+[BepInDependency("mtm101.rulerp.baldiplus.baldiarcade", BepInDependency.DependencyFlags.SoftDependency)]
 public class ABWEventsPlugin : BaseUnityPlugin
 {
     internal const string PLUGIN_GUID = "alexbw145.bbplus.eventsoverload";
@@ -496,7 +498,8 @@ This is actually an early access release...", false);*/
 
     private IEnumerator PreLoad()
     {
-        yield return 4;
+        yield return 4 
+            + (Chainloader.PluginInfos.ContainsKey("mtm101.rulerp.baldiplus.baldiarcade") ? 2 : 0);
         yield return "Self-inserting that person...";
         var abw = new SimpleBaldiTVCharacter(assets.GetAll<SoundObject>().Where(x => x.name.StartsWith("Vfx_ABW_")).ToList(), assets.Get<Sprite[]>("SelfInsertGuy"), 1.5f);
         BaldiTVExtensionHandler.AddCharacter("abw", abw);
@@ -1611,6 +1614,9 @@ This is actually an early access release...", false);*/
                 "TimeOver/MissleShuffleChaos"
                 ]);
         assets.Add("MissleShuffleChaos", gamemanager);
+
+        if (Chainloader.PluginInfos.ContainsKey("mtm101.rulerp.baldiplus.baldiarcade"))
+            yield return ArcadeEternityAdds.ArcadeEternityStuff();
     }
 }
 
