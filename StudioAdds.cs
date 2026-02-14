@@ -91,6 +91,7 @@ internal static class StudioAdds
                 mode.availableGameModes.Add("missleshufflechaos");
             if (mode.id != "rooms")
             {
+                EditorInterfaceModes.AddToolsToCategory(mode, "items", [new ItemTool("ufospikedball", false), new ItemTool("ufospikedballstacked", false)]);
                 EditorInterfaceModes.AddToolsToCategory(mode, "tools", [
                     new GnatSwarmHousingPlacement("gnatswarm_placement", ABWEventsPlugin.assets.Get<Sprite>("gnatswarm_placement")),
                     new TrafficTroubleTunnelTool("traffictrouble_placement", ABWEventsPlugin.assets.Get<Sprite>("traffictrouble_placement")),

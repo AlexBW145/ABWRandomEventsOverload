@@ -3,6 +3,7 @@ using MonoMod.Utils;
 using MTM101BaldAPI;
 using PlusStudioLevelLoader;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace ABWEvents.LevelStudioLoader;
@@ -50,6 +51,8 @@ internal static class LoaderAdds
         glowlything.transform.localPosition = Vector3.up * 5f;
         glowlything.GetComponent<SpriteRenderer>().color = new Color(0.8980392157f, 0.2235294118f, 0.2666666667f);
         LevelLoaderPlugin.Instance.tileBasedObjectPrefabs.Add("nightmares_placement", fissurePlacement.GetComponent<NightmaresEvent.FissurePlacement>());
+        LevelLoaderPlugin.Instance.itemObjects.Add("ufospikedball", ITM_SpikedBall.stacksItems.First());
+        LevelLoaderPlugin.Instance.itemObjects.Add("ufospikedballstacked", ITM_SpikedBall.stacksItems.Last());
         // Dummy structure because Studio does not have a way of tile objects.
         var dummy = new GameObject("Dummy Structure", typeof(StructureBuilder));
         dummy.ConvertToPrefab(true);

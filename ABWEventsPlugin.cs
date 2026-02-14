@@ -35,7 +35,7 @@ public class ABWEventsPlugin : BaseUnityPlugin
 {
     internal const string PLUGIN_GUID = "alexbw145.bbplus.eventsoverload";
     private const string PLUGIN_NAME = "AlexBW145's Events Overload";
-    private const string PLUGIN_VERSION = "1.0.3";
+    private const string PLUGIN_VERSION = "1.0.4";
 
     internal static new ManualLogSource Logger;
     internal static AssetManager assets = new AssetManager();
@@ -175,7 +175,11 @@ This is actually an early access release...", false);*/
                 { "Ed_Tool_traffictrouble_placement_Title", "Traffic Tunnel" },
                 { "Ed_Tool_traffictrouble_placement_Desc", "Constructs a tunnel for traffic to flow." },
                 { "Ed_Tool_nightmares_placement_Title", "Nightmare Fissure" },
-                { "Ed_Tool_nightmares_placement_Desc", "Evil residue containment and will always be real." }
+                { "Ed_Tool_nightmares_placement_Desc", "Evil residue containment and will always be real." },
+                { "Ed_Tool_item_ufospikedball_Title", "Spiked Ball" },
+                { "Ed_Tool_item_ufospikedball_Desc", "Throw this spiked ball towards the UFOs or anyone else really!\nCan be stacked up to 9 uses!" },
+                { "Ed_Tool_item_ufospikedballstacked_Title", "Spiked Balls" },
+                { "Ed_Tool_item_ufospikedballstacked_Desc", "Throw this spiked ball towards the UFOs or anyone else really!\nHas 9 uses!" }
             };
         });
         #endregion
