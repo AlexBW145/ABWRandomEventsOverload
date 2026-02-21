@@ -2,6 +2,7 @@
 using ABWEvents.LevelStudio;
 using ABWEvents.LevelStudioLoader;
 using ABWEvents.Patches;
+using ABWEvents.PineDebug;
 using BepInEx;
 using BepInEx.Bootstrap;
 using BepInEx.Configuration;
@@ -10,7 +11,6 @@ using HarmonyLib;
 using MonoMod.Utils;
 using MTM101BaldAPI;
 using MTM101BaldAPI.AssetTools;
-using MTM101BaldAPI.Components;
 using MTM101BaldAPI.Components.Animation;
 using MTM101BaldAPI.ObjectCreation;
 using MTM101BaldAPI.PlusExtensions;
@@ -31,6 +31,7 @@ namespace ABWEvents;
 [BepInDependency("mtm101.rulerp.bbplus.baldidevapi", "10.0.0")]
 [BepInDependency("mtm101.rulerp.baldiplus.levelstudioloader", BepInDependency.DependencyFlags.SoftDependency)]
 [BepInDependency("mtm101.rulerp.baldiplus.levelstudio", BepInDependency.DependencyFlags.SoftDependency)]
+[BepInDependency("alexbw145.baldiplus.pinedebug", BepInDependency.DependencyFlags.SoftDependency)]
 public class ABWEventsPlugin : BaseUnityPlugin
 {
     internal const string PLUGIN_GUID = "alexbw145.bbplus.eventsoverload";
@@ -67,6 +68,9 @@ This is actually an early access release...", false);*/
     {
         if (Chainloader.PluginInfos.ContainsKey("mtm101.rulerp.baldiplus.levelstudio"))
             StudioAdds.InsertCrazysIntoList();
+        if (Chainloader.PluginInfos.ContainsKey("alexbw145.baldiplus.pinedebug"))
+            PineDebugIcons.AddPineDebugIcons();
+
     }
 
     private IEnumerator PostLoad()
@@ -488,6 +492,12 @@ This is actually an early access release...", false);*/
             string[] files = Directory.GetFiles(Path.Combine(AssetLoader.GetModPath(this), "Texture2D", "EditorUI"));
             for (int i = 0; i < files.Length; i++)
                 assets.Add(Path.GetFileNameWithoutExtension(files[i]), AssetLoader.SpriteFromTexture2D(AssetLoader.TextureFromFile(files[i]), 1f));
+        }
+        if (Chainloader.PluginInfos.ContainsKey("alexbw145.baldiplus.pinedebug"))
+        {
+            string[] files = Directory.GetFiles(Path.Combine(AssetLoader.GetModPath(this), "Texture2D", "PineDebug"));
+            for (int i = 0; i < files.Length; i++)
+                assets.Add(Path.GetFileNameWithoutExtension(files[i]), AssetLoader.TextureFromFile(files[i]));
         }
     }
 
