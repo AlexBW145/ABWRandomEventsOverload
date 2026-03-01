@@ -1,4 +1,5 @@
 ﻿using HarmonyLib;
+using MTM101BaldAPI.Registers.Buttons;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -466,6 +467,13 @@ public class TrafficTroubleTunnel : Door
     {
     }
 }
+[Serializable]
+internal class SpriteRotationGuideMap : SpriteRotationMap
+{
+    [SerializeField] internal Sprite[] spriteGuideSheet = new Sprite[0];
+
+    public Sprite GuideSprite(int id) => spriteGuideSheet[id];
+}
 
 public class TrafficTroubleCar : NPC
 {
@@ -475,8 +483,15 @@ public class TrafficTroubleCar : NPC
     [SerializeField] internal SoundObject[] horn;
     [SerializeField] internal float speed = 35f;
     private float sightedCooldown;
-    [SerializeField] internal List<SpriteRotationMap> sheetSelection = new List<SpriteRotationMap>();
     [SerializeField] internal AnimatedSpriteRotator rotatorMan;
+    private static FieldInfo _sheet = AccessTools.DeclaredField(typeof(AnimatedSpriteRotator), "spriteMap");
+    [SerializeField] internal SpriteRotationGuideMap guidemapserialize;
+
+    private void Awake()
+    {
+        if (rotatorMan != null && guidemapserialize != null)
+            _sheet.SetValue(rotatorMan, new SpriteRotationMap[] { guidemapserialize }); // Subclass objects does not serialize correctly on lists/arrays if not derived from being a game object.
+    }
 
     public override void Initialize()
     {
@@ -485,10 +500,14 @@ public class TrafficTroubleCar : NPC
         behaviorStateMachine.ChangeNavigationState(new NavigationState_DoNothing(this, 0));
     }
 
-    private static FieldInfo _sheet = AccessTools.DeclaredField(typeof(AnimatedSpriteRotator), "spriteMap");
     public void Initialize(Vector3 endPos)
     {
-        _sheet.SetValue(rotatorMan, new SpriteRotationMap[] { sheetSelection[Mathf.RoundToInt(UnityEngine.Random.Range(0f, sheetSelection.Count - 1f))] });
+        var prop = new MaterialPropertyBlock();
+        var colors = ButtonColorManager.definedColors;
+        spriteRenderer[0].GetPropertyBlock(prop);
+        prop.SetColor("_Color", ButtonColorManager.GetColorFromKey(colors[Mathf.RoundToInt(UnityEngine.Random.Range(0f, colors.Length - 1f))]));
+        prop.SetFloat("_ColorMultiplier", 1.5f);
+        spriteRenderer[0].SetPropertyBlock(prop);
         behaviorStateMachine.ChangeState(new TrafficTroubleCar_Wandering(this, endPos));
     }
 

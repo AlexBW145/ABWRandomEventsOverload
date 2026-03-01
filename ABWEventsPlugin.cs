@@ -188,15 +188,17 @@ This is actually an early access release...", false);*/
         });
         #endregion
         #region TRAFFIC TROUBLE CARS
-        List<Sprite[]> spritesheets = new List<Sprite[]>();
+        /*List<Sprite[]> spritesheets = new List<Sprite[]>();
         foreach (var spritesheet in Directory.GetFiles(Path.Combine(AssetLoader.GetModPath(this), "Texture2D", "TrafficTrouble", "Cars"), "*.png"))
         {
             var sheet = AssetLoader.SpritesFromSpritesheet(12, 1, 26, Vector2.one / 2f, AssetLoader.TextureFromFile(spritesheet));
             spritesheets.Add(sheet);
         }
-        assets.Add("TrafficTrouble/CarSheets", spritesheets);
-        assets.Add("SelfInsertGuy", AssetLoader.SpritesFromSpritesheet(5, 1, 1f, Vector2.one / 2f, AssetLoader.TextureFromMod(this, "Texture2D", "selfinsertguy_tvsheet.png")));
+        assets.Add("TrafficTrouble/CarSheets", spritesheets);*/
+        assets.Add("TrafficTrouble/CarSheet", AssetLoader.SpritesFromSpritesheet(12, 1, 26, Vector2.one / 2f, AssetLoader.TextureFromMod(this, "Texture2D", "TrafficTrouble", "Cars", "traffictrouble_car_guidemapcompatible_sheet.png")));
+        assets.Add("TrafficTrouble/CarGuidemapSheet", AssetLoader.SpritesFromSpritesheet(12, 1, 26, Vector2.one / 2f, AssetLoader.TextureFromMod(this, "Texture2D", "TrafficTrouble", "Cars", "traffictrouble_car_guidemap_sheet.png")));
         #endregion
+        assets.Add("SelfInsertGuy", AssetLoader.SpritesFromSpritesheet(5, 1, 1f, Vector2.one / 2f, AssetLoader.TextureFromMod(this, "Texture2D", "selfinsertguy_tvsheet.png")));
         #region SOUND ASSETS
         Color him = new Color(0.1921568627f, 0.5411764706f, 1f);
         assets.AddRange<SoundObject>([
@@ -751,22 +753,21 @@ This is actually an early access release...", false);*/
         trafficCar.motorAudMan = motorAudMan;
         
         trafficCar.deathSignal = Resources.FindObjectsOfTypeAll<QuickExplosion>().Last(x => x.name == "QuickExplosion");
+        FieldInfo 
+            _renderer = AccessTools.DeclaredField(typeof(AnimatedSpriteRotator), "renderer"),
+            _spriteSheet = AccessTools.DeclaredField(typeof(SpriteRotationMap), "spriteSheet");
         AnimatedSpriteRotator roatingSprite = trafficCar.spriteBase.AddComponent<AnimatedSpriteRotator>();
-        var _renderer = AccessTools.DeclaredField(typeof(AnimatedSpriteRotator), "renderer");
         _renderer.SetValue(roatingSprite, trafficCar.spriteRenderer[0]);
-        var sheets = assets.Get<List<Sprite[]>>("TrafficTrouble/CarSheets");
-        var _spriteSheet = AccessTools.DeclaredField(typeof(SpriteRotationMap), "spriteSheet");
-        foreach (var _sheet in sheets)
+        SpriteRotationGuideMap idleRotationMap = new SpriteRotationGuideMap()
         {
-            SpriteRotationMap idleRotationMap = new SpriteRotationMap()
-            {
-                angleCount = 12,
-            };
-            _spriteSheet.SetValue(idleRotationMap, _sheet);
-            trafficCar.sheetSelection.Add(idleRotationMap);
-        }
+            angleCount = 12,
+        };
+        _spriteSheet.SetValue(idleRotationMap, assets.Get<Sprite[]>("TrafficTrouble/CarSheet"));
+        idleRotationMap.spriteGuideSheet = assets.Get<Sprite[]>("TrafficTrouble/CarGuidemapSheet");
+        roatingSprite.targetSprite = idleRotationMap.Sprite(0);
         var sheet = AccessTools.DeclaredField(typeof(AnimatedSpriteRotator), "spriteMap");
-        sheet.SetValue(roatingSprite, new SpriteRotationMap[] { trafficCar.sheetSelection[0] });
+        sheet.SetValue(roatingSprite, new SpriteRotationMap[] { idleRotationMap });
+        trafficCar.guidemapserialize = idleRotationMap;
         trafficCar.rotatorMan = roatingSprite;
         trafficCar.spriteBase.transform.position = Vector3.down * 0.75f;
 
