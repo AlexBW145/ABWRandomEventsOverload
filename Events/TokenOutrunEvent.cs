@@ -14,7 +14,7 @@ public class TokenOutrunEvent : BonusEventBase
     public override void Begin()
     {
         base.Begin();
-        guy = ec.SpawnNPC(guyPrefab, ec.CellFromPosition(ec.elevators[0].transform.position).position) as TokenOutrunGuy;
+        guy = ec.SpawnNPC(guyPrefab, ec.CellFromPosition(ec.Elevators[0].transform.position).position) as TokenOutrunGuy;
     }
 
     public override void End()
@@ -236,15 +236,15 @@ public class TokenOutrunGuy_Leaving : TokenOutrunGuy_StateBase
     public override void Enter()
     {
         base.Enter();
-        ChangeNavigationState(new NavigationState_TargetPosition(guy, 99, guy.ec.CellFromPosition(guy.ec.elevators.Last().transform.position).CenterWorldPosition));
+        ChangeNavigationState(new NavigationState_TargetPosition(guy, 99, guy.ec.CellFromPosition(guy.ec.Elevators.Last().transform.position).CenterWorldPosition));
     }
 
     public override void DestinationEmpty()
     {
-        if (guy.ec.CellFromPosition(guy.transform.position) == guy.ec.CellFromPosition(guy.ec.elevators.Last().transform.position))
+        if (guy.ec.CellFromPosition(guy.transform.position) == guy.ec.CellFromPosition(guy.ec.Elevators.Last().transform.position))
             guy.Despawn();
         else
-            ChangeNavigationState(new NavigationState_TargetPosition(guy, 99, guy.ec.CellFromPosition(guy.ec.elevators.Last().transform.position).CenterWorldPosition));
+            ChangeNavigationState(new NavigationState_TargetPosition(guy, 99, guy.ec.CellFromPosition(guy.ec.Elevators.Last().transform.position).CenterWorldPosition));
     }
 
     public override void PlayerSighted(PlayerManager player)

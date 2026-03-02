@@ -21,8 +21,8 @@ namespace ABWEvents.LevelStudio;
 
 internal static class StudioAdds
 {
-    internal static List<string> editorHyperEvents { get; private set; } = new List<string>();
-    internal static List<string> editorBonusEvents { get; private set; } = new List<string>();
+    internal readonly static List<string> editorHyperEvents = new List<string>();
+    internal readonly static List<string> editorBonusEvents = new List<string>();
 
     internal static void AddStuffToLevelStudio()
     {

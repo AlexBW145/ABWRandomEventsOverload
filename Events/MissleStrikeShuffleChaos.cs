@@ -49,13 +49,10 @@ public class MissleStrikeShuffleGameManager : BaseGameManager
     public override void PrepareLevelGenerationData()
     {
         base.PrepareLevelGenerationData();
-        levelObject.additionalNPCs = 0;
         levelObject.forcedNpcs = [];
-        levelObject.potentialNPCs = [];
         levelObject.minEvents = 0;
         levelObject.maxEvents = 0;
         levelObject.randomEvents = [];
-        levelObject.potentialBaldis = [];
         if (levelObject is CustomLevelGenerationParameters)
         {
             var ld = levelObject as CustomLevelGenerationParameters;
@@ -115,7 +112,7 @@ public class MissleStrikeShuffleGameManager : BaseGameManager
         }
     }
 
-    protected override void ExitedSpawn()
+    public override void ExitedSpawn()
     {
         base.ExitedSpawn();
         BeginSpoopMode();
