@@ -1680,7 +1680,7 @@ internal class ABWEventsOverloadSaveIO : ModdedSaveGameIOBinary // Copied from M
         if (tags.Contains("CrazyEventsAlways"))
             baseMode += "\nCrazy Random Events Always Encounterable";
         if (tags.Contains("NoMissleShuffleChaos"))
-            baseMode += "\nMissle Shuffle Chaos Disabled";
+            baseMode += "\nMissile Shuffle Chaos Disabled";
         return baseMode;
     }
 }
