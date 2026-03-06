@@ -92,7 +92,7 @@ internal static class StudioAdds
             if (mode.id != "rooms")
             {
                 EditorInterfaceModes.AddToolsToCategory(mode, "items", [new ItemTool("ufospikedball", false), new ItemTool("ufospikedballstacked", false)]);
-                EditorInterfaceModes.AddToolsToCategory(mode, "tools", [
+                EditorInterfaceModes.AddToolsToCategory(mode, "structures", [
                     new GnatSwarmHousingPlacement("gnatswarm_placement", ABWEventsPlugin.assets.Get<Sprite>("gnatswarm_placement")),
                     new TrafficTroubleTunnelTool("traffictrouble_placement", ABWEventsPlugin.assets.Get<Sprite>("traffictrouble_placement")),
                     new GnatSwarmHousingPlacement("nightmares_placement", ABWEventsPlugin.assets.Get<Sprite>("nightmares_placement")),
