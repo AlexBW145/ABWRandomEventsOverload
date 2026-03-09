@@ -6,15 +6,17 @@ A Baldi's Basics Plus mod that self-inserts four new events into the game, with 
 - Made the mod
 - Coded the events in sight
 - Also coded the implemention of CRAZY and bonus events
-- Made models for UFOs, Spiked Balls, Token Thief, Gnat Houses, Traffic Trouble Cars, and Token Outrun + Token Collector tokens.
+- Made models for UFOs, Spiked Balls, Token Outrun Thief, Gnat Houses, Traffic Trouble Cars, and Token Outrun + Token Collector tokens.
 * ### B-Side Skid (on Gamebanana)
-- Traffic Trouble road assets before they were modified.
+- Traffic Trouble road assets before they were altered.
 * ### PixelGuy
 - Helped with an information of a transpiler opcode.
 * ### MissingTextureMan(/Meow)101
 - Suggested Traffic Trouble cars exploding when colliding with frozen NPCs.
 - Made the API that this mod is dependent to.
 - Made Level Loader and Level Studio, which the mod has compatability with.
+* ### CosmicNyan
+- Brainstormed the visual design of the Token Outrun Thief.
 
 # Content Notice
 *This mod contains random events that has contents that originated and belonged to different video games and is not responsible for the damage that caused towards Baldi's super schoolhouse.*

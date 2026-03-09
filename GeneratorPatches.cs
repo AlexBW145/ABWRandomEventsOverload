@@ -150,9 +150,17 @@ class GeneratorPatches
     [HarmonyPatch(typeof(GameInitializer), nameof(GameInitializer.Initialize)), HarmonyPrefix]
     static void MissleModeAssign()
     {
-        if (CoreGameManager.Instance.sceneObject.name == "MainLevel_5"
-            && new System.Random(CoreGameManager.Instance.Seed() + CoreGameManager.Instance.sceneObject.levelNo).NextDouble() < (double)0.1f) // 10% chance for doomsday
-            CoreGameManager.Instance.sceneObject = missleShuffleObject;
+        if (!ABWEventsPlugin.missleChaos.Value) return;
+        if (CoreGameManager.Instance.sceneObject.name == "MainLevel_5" || (CoreGameManager.Instance.nextLevel?.name == "MainLevel_5" && BaseGameManager.Instance.InPitstop()))
+        {
+            var rng = new System.Random(CoreGameManager.Instance.Seed() + 4);
+            if (CoreGameManager.Instance.sceneObject.name == "MainLevel_5"
+            && rng.NextDouble() < (double)0.1f) // 10% chance for doomsday
+                CoreGameManager.Instance.sceneObject = missleShuffleObject;
+            else if (CoreGameManager.Instance.nextLevel?.name == "MainLevel_5" && BaseGameManager.Instance.InPitstop()
+                && rng.NextDouble() < (double)0.1f)
+                CoreGameManager.Instance.nextLevel = missleShuffleObject;
+        }
     }
 
     private static FieldInfo _events = AccessTools.Field(typeof(EnvironmentController), "events");

@@ -35,6 +35,9 @@
     <Reference Include="MTM101BaldAPI">
       <HintPath>..\..\..\SteamLibrary\steamapps\common\Baldi's Basics Plus\BepInEx\plugins\MTM101BaldAPI.dll</HintPath>
     </Reference>
+    <Reference Include="PineDebug">
+      <HintPath>..\PineDebug\bin\Release\netstandard2.0\PineDebug.dll</HintPath>
+    </Reference>
     <Reference Include="PlusLevelStudio">
       <HintPath>..\..\..\SteamLibrary\steamapps\common\Baldi's Basics Plus\BepInEx\plugins\PlusLevelStudio.dll</HintPath>
     </Reference>

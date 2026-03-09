@@ -3,6 +3,7 @@ using ABWEvents.Events;
 using ABWEvents.LevelStudio;
 using ABWEvents.LevelStudioLoader;
 using ABWEvents.Patches;
+using ABWEvents.PineDebug;
 using BepInEx;
 using BepInEx.Bootstrap;
 using BepInEx.Configuration;
@@ -11,7 +12,6 @@ using HarmonyLib;
 using MonoMod.Utils;
 using MTM101BaldAPI;
 using MTM101BaldAPI.AssetTools;
-using MTM101BaldAPI.Components;
 using MTM101BaldAPI.Components.Animation;
 using MTM101BaldAPI.ObjectCreation;
 using MTM101BaldAPI.PlusExtensions;
@@ -29,15 +29,16 @@ using UnityEngine;
 namespace ABWEvents;
 
 [BepInPlugin(PLUGIN_GUID, PLUGIN_NAME, PLUGIN_VERSION)]
-[BepInDependency("mtm101.rulerp.bbplus.baldidevapi", "10.0.0")]
+[BepInDependency("mtm101.rulerp.bbplus.baldidevapi", "11.0.0.0")]
 [BepInDependency("mtm101.rulerp.baldiplus.levelstudioloader", BepInDependency.DependencyFlags.SoftDependency)]
 [BepInDependency("mtm101.rulerp.baldiplus.levelstudio", BepInDependency.DependencyFlags.SoftDependency)]
+[BepInDependency("alexbw145.baldiplus.pinedebug", BepInDependency.DependencyFlags.SoftDependency)]
 [BepInDependency("mtm101.rulerp.baldiplus.baldiarcade", BepInDependency.DependencyFlags.SoftDependency)]
 public class ABWEventsPlugin : BaseUnityPlugin
 {
     internal const string PLUGIN_GUID = "alexbw145.bbplus.eventsoverload";
     private const string PLUGIN_NAME = "AlexBW145's Events Overload";
-    private const string PLUGIN_VERSION = "1.0.4";
+    private const string PLUGIN_VERSION = "1.0.5";
 
     internal static new ManualLogSource Logger;
     internal static AssetManager assets = new AssetManager();
@@ -46,6 +47,7 @@ public class ABWEventsPlugin : BaseUnityPlugin
     public static SoundObject _hyperJingle => assets.Get<SoundObject>("EventJingles/Hyper");
     internal static ConfigEntry<bool> instantHyper { get; private set; }
     internal static ConfigEntry<bool> youtuberMode { get; private set; }
+    internal static ConfigEntry<bool> missleChaos { get; private set; }
     public static List<RandomEvent> hyperEvents { get; private set; } = new List<RandomEvent>();
 
     private void Awake()
@@ -54,6 +56,7 @@ public class ABWEventsPlugin : BaseUnityPlugin
         Logger = base.Logger;
         instantHyper = Config.Bind("Generation Settings", "Force Crazy Events", false, "If set to 'true', then crazy event will always replace specific regular events regardless of rng and chance percentage. (This config is mainly be paired with Youtuber Mode)");
         youtuberMode = Config.Bind("Generation Settings", "Youtuber Mode", false, "If set to 'true', then regular events from this mod will always be forced! (But not bonus events, forcing crazy events are a separate option.)");
+        missleChaos = Config.Bind("Generation Settings", "Missle Shuffle Chaos Encounter", true, "If set to 'true', then a 10% encounter when entering F5 will change the game rules to Missle Shuffle Chaos, a stealth version of the Missle Shuffle Strike random event.");
         new Harmony(PLUGIN_GUID).PatchAllConditionals();
         LoadingEvents.RegisterOnAssetsLoaded(Info, AssetsLoad, LoadingEventOrder.Start);
         LoadingEvents.RegisterOnAssetsLoaded(Info, PreLoad(), LoadingEventOrder.Pre);
@@ -69,6 +72,9 @@ This is actually an early access release...", false);*/
     {
         if (Chainloader.PluginInfos.ContainsKey("mtm101.rulerp.baldiplus.levelstudio"))
             StudioAdds.InsertCrazysIntoList();
+        if (Chainloader.PluginInfos.ContainsKey("alexbw145.baldiplus.pinedebug"))
+            PineDebugIcons.AddPineDebugIcons();
+
     }
 
     private IEnumerator PostLoad()
@@ -186,15 +192,17 @@ This is actually an early access release...", false);*/
         });
         #endregion
         #region TRAFFIC TROUBLE CARS
-        List<Sprite[]> spritesheets = new List<Sprite[]>();
+        /*List<Sprite[]> spritesheets = new List<Sprite[]>();
         foreach (var spritesheet in Directory.GetFiles(Path.Combine(AssetLoader.GetModPath(this), "Texture2D", "TrafficTrouble", "Cars"), "*.png"))
         {
             var sheet = AssetLoader.SpritesFromSpritesheet(12, 1, 26, Vector2.one / 2f, AssetLoader.TextureFromFile(spritesheet));
             spritesheets.Add(sheet);
         }
-        assets.Add("TrafficTrouble/CarSheets", spritesheets);
-        assets.Add("SelfInsertGuy", AssetLoader.SpritesFromSpritesheet(5, 1, 1f, Vector2.one / 2f, AssetLoader.TextureFromMod(this, "Texture2D", "selfinsertguy_tvsheet.png")));
+        assets.Add("TrafficTrouble/CarSheets", spritesheets);*/
+        assets.Add("TrafficTrouble/CarSheet", AssetLoader.SpritesFromSpritesheet(12, 1, 26, Vector2.one / 2f, AssetLoader.TextureFromMod(this, "Texture2D", "TrafficTrouble", "Cars", "traffictrouble_car_guidemapcompatible_sheet.png")));
+        assets.Add("TrafficTrouble/CarGuidemapSheet", AssetLoader.SpritesFromSpritesheet(12, 1, 26, Vector2.one / 2f, AssetLoader.TextureFromMod(this, "Texture2D", "TrafficTrouble", "Cars", "traffictrouble_car_guidemap_sheet.png")));
         #endregion
+        assets.Add("SelfInsertGuy", AssetLoader.SpritesFromSpritesheet(5, 1, 1f, Vector2.one / 2f, AssetLoader.TextureFromMod(this, "Texture2D", "selfinsertguy_tvsheet.png")));
         #region SOUND ASSETS
         Color him = new Color(0.1921568627f, 0.5411764706f, 1f);
         assets.AddRange<SoundObject>([
@@ -460,6 +468,7 @@ This is actually an early access release...", false);*/
         ufoMat.name = "UFOSmashable";
         ufoMat.SetMainTexture(AssetLoader.TextureFromMod(this, "Models", "UFOSmashable.png"));
         ufoMat.SetTexture("_LightGuide", AssetLoader.TextureFromMod(this, "Models", "UFOlightmap.png"));
+        ufoMat.EnableKeyword("_ALPHATEST_ON");
         ufo.transform.GetChild(0).GetComponent<Renderer>().SetMaterial(ufoMat);
         ufo.ConvertToPrefab(true);
         assets.Add("UFOSmasher/UFOModel", ufo);
@@ -490,6 +499,12 @@ This is actually an early access release...", false);*/
             string[] files = Directory.GetFiles(Path.Combine(AssetLoader.GetModPath(this), "Texture2D", "EditorUI"));
             for (int i = 0; i < files.Length; i++)
                 assets.Add(Path.GetFileNameWithoutExtension(files[i]), AssetLoader.SpriteFromTexture2D(AssetLoader.TextureFromFile(files[i]), 1f));
+        }
+        if (Chainloader.PluginInfos.ContainsKey("alexbw145.baldiplus.pinedebug"))
+        {
+            string[] files = Directory.GetFiles(Path.Combine(AssetLoader.GetModPath(this), "Texture2D", "PineDebug"));
+            for (int i = 0; i < files.Length; i++)
+                assets.Add(Path.GetFileNameWithoutExtension(files[i]), AssetLoader.TextureFromFile(files[i]));
         }
     }
 
@@ -744,22 +759,21 @@ This is actually an early access release...", false);*/
         trafficCar.motorAudMan = motorAudMan;
         
         trafficCar.deathSignal = Resources.FindObjectsOfTypeAll<QuickExplosion>().Last(x => x.name == "QuickExplosion");
+        FieldInfo 
+            _renderer = AccessTools.DeclaredField(typeof(AnimatedSpriteRotator), "renderer"),
+            _spriteSheet = AccessTools.DeclaredField(typeof(SpriteRotationMap), "spriteSheet");
         AnimatedSpriteRotator roatingSprite = trafficCar.spriteBase.AddComponent<AnimatedSpriteRotator>();
-        var _renderer = AccessTools.DeclaredField(typeof(AnimatedSpriteRotator), "renderer");
         _renderer.SetValue(roatingSprite, trafficCar.spriteRenderer[0]);
-        var sheets = assets.Get<List<Sprite[]>>("TrafficTrouble/CarSheets");
-        var _spriteSheet = AccessTools.DeclaredField(typeof(SpriteRotationMap), "spriteSheet");
-        foreach (var _sheet in sheets)
+        SpriteRotationGuideMap idleRotationMap = new SpriteRotationGuideMap()
         {
-            SpriteRotationMap idleRotationMap = new SpriteRotationMap()
-            {
-                angleCount = 12,
-            };
-            _spriteSheet.SetValue(idleRotationMap, _sheet);
-            trafficCar.sheetSelection.Add(idleRotationMap);
-        }
+            angleCount = 12,
+        };
+        idleRotationMap.AssignRotationMapSprites(assets.Get<Sprite[]>("TrafficTrouble/CarSheet"));
+        idleRotationMap.spriteGuideSheet = assets.Get<Sprite[]>("TrafficTrouble/CarGuidemapSheet");
+        roatingSprite.targetSprite = idleRotationMap.Sprite(0);
         var sheet = AccessTools.DeclaredField(typeof(AnimatedSpriteRotator), "spriteMap");
-        sheet.SetValue(roatingSprite, new SpriteRotationMap[] { trafficCar.sheetSelection[0] });
+        sheet.SetValue(roatingSprite, new SpriteRotationMap[] { idleRotationMap });
+        trafficCar.guidemapserialize = idleRotationMap;
         trafficCar.rotatorMan = roatingSprite;
         trafficCar.spriteBase.transform.position = Vector3.down * 0.75f;
 
@@ -1171,11 +1185,6 @@ This is actually an early access release...", false);*/
             .SetMaxSightDistance(1000f)
             .Build();
         var theifRot = guy.gameObject.AddComponent<AnimatedSpriteRotator>();
-        _renderer.SetValue(theifRot, guy.spriteRenderer[0]);
-        SpriteRotationMap theifRotationMap = new SpriteRotationMap()
-        {
-            angleCount = 2,
-        };
         var front = assets.Get<Sprite[]>("TokenOutrun/ThiefFrontfacing"); // Front facing, used for the animator.
         var back = assets.Get<Sprite[]>("TokenOutrun/ThiefBackfacing");
         List<Sprite> theifSprites = new List<Sprite>();
@@ -1186,13 +1195,12 @@ This is actually an early access release...", false);*/
                 back[i]
                 ]);
         }
-        _spriteSheet.SetValue(theifRotationMap, theifSprites.ToArray());
-        sheet.SetValue(theifRot, new SpriteRotationMap[] { theifRotationMap });
         guy.animator = guy.gameObject.AddComponent<CustomSpriteRotatorAnimator>();
-        guy.animator.spriteRotator = theifRot;
-        guy.animator.LoadAnimations(new Dictionary<string, SpriteAnimation>()
+        guy.animator.renderer = theifRot;
+        guy.animator.SetSpriteRenderer(guy.spriteRenderer[0]);
+        guy.animator.LoadAngledAnimations(new Dictionary<string, SpriteRotatedAnimation>()
         {
-            { "running", new SpriteAnimation(24, front) }
+            { "running", new SpriteRotatedAnimation(24, theifSprites.ToArray(), 2) }
         });
         guy.animator.timeScale = TimeScaleType.Npc;
         guy.spriteRenderer[0].transform.localPosition = Vector3.down * 0.3f;
@@ -1289,19 +1297,15 @@ This is actually an early access release...", false);*/
         ballPrefab.entity.GetComponent<SphereCollider>().radius = 2f;
         ballPrefab.gameObject.name = "ITM_SpikedBall";
         AnimatedSpriteRotator ballRot = ballPrefab.gameObject.AddComponent<AnimatedSpriteRotator>();
-        _renderer.SetValue(ballRot, ballPrefab.transform.GetChild(0).GetComponentInChildren<SpriteRenderer>());
-        SpriteRotationMap rollerRotationMap = new SpriteRotationMap()
-        {
-            angleCount = 8,
-        };
-        var dir1 = assets.Get<Sprite[]>("UFOSmasher/Dir1");
-        var dir2 = assets.Get<Sprite[]>("UFOSmasher/Dir2");
-        var dir3 = assets.Get<Sprite[]>("UFOSmasher/Dir3");
-        var dir4 = assets.Get<Sprite[]>("UFOSmasher/Dir4");
-        var dir5 = assets.Get<Sprite[]>("UFOSmasher/Dir5"); // FOR CODE VIEWERS: These are the front facing sprites that we are using for the custom animator.
-        var dir6 = assets.Get<Sprite[]>("UFOSmasher/Dir6");
-        var dir7 = assets.Get<Sprite[]>("UFOSmasher/Dir7");
-        var dir8 = assets.Get<Sprite[]>("UFOSmasher/Dir8");
+        Sprite[] 
+            dir1 = assets.Get<Sprite[]>("UFOSmasher/Dir1"),
+            dir2 = assets.Get<Sprite[]>("UFOSmasher/Dir2"),
+            dir3 = assets.Get<Sprite[]>("UFOSmasher/Dir3"),
+            dir4 = assets.Get<Sprite[]>("UFOSmasher/Dir4"),
+            dir5 = assets.Get<Sprite[]>("UFOSmasher/Dir5"), // FOR CODE VIEWERS: These are the front facing sprites that we are using for the custom animator.
+            dir6 = assets.Get<Sprite[]>("UFOSmasher/Dir6"),
+            dir7 = assets.Get<Sprite[]>("UFOSmasher/Dir7"),
+            dir8 = assets.Get<Sprite[]>("UFOSmasher/Dir8");
         List<Sprite> rollersprites = new List<Sprite>();
         for (int i = 0; i < 6; i++)
         {
@@ -1316,13 +1320,12 @@ This is actually an early access release...", false);*/
                 dir4[i]
                 ]);
         }
-        _spriteSheet.SetValue(rollerRotationMap, rollersprites.ToArray());
-        sheet.SetValue(ballRot, new SpriteRotationMap[] { rollerRotationMap });
         ballPrefab.animator = ballPrefab.gameObject.AddComponent<CustomSpriteRotatorAnimator>();
-        ballPrefab.animator.spriteRotator = ballRot;
-        ballPrefab.animator.LoadAnimations(new Dictionary<string, SpriteAnimation>()
+        ballPrefab.animator.renderer = ballRot;
+        ballPrefab.animator.SetSpriteRenderer(ballPrefab.transform.GetChild(0).GetComponentInChildren<SpriteRenderer>());
+        ballPrefab.animator.LoadAngledAnimations(new Dictionary<string, SpriteRotatedAnimation>()
         {
-            { "rolling", new SpriteAnimation(24, dir5.ToArray()) }
+            { "rolling", new SpriteRotatedAnimation(24, rollersprites.ToArray(), 8) }
         });
         ballPrefab.animator.timeScale = TimeScaleType.Environment;
 
@@ -1672,6 +1675,8 @@ internal class ABWEventsOverloadSaveIO : ModdedSaveGameIOBinary // Copied from M
             generatedTags.Add("YoutuberMode");
         if (ABWEventsPlugin.instantHyper.Value)
             generatedTags.Add("CrazyEventsAlways");
+        if (!ABWEventsPlugin.missleChaos.Value)
+            generatedTags.Add("NoMissleShuffleChaos");
         return generatedTags.ToArray();
     }
 
@@ -1679,7 +1684,9 @@ internal class ABWEventsOverloadSaveIO : ModdedSaveGameIOBinary // Copied from M
     {
         string baseMode = tags.Contains("YoutuberMode") ? "Youtuber Mode" : "Standard Mode";
         if (tags.Contains("CrazyEventsAlways"))
-            baseMode += "\nCrazy Events Always Encounterable";
+            baseMode += "\nCrazy Random Events Always Encounterable";
+        if (tags.Contains("NoMissleShuffleChaos"))
+            baseMode += "\nMissile Shuffle Chaos Disabled";
         return baseMode;
     }
 }
@@ -1693,9 +1700,9 @@ internal interface IEventSpawnPlacement
 
 // Figured that this is easier than doing the same thing from Siege Cannon Cart.
 // Also the component exists in the Baldi Dev API but that does hacky things.
-[Serializable]
+/*[Serializable]
 public class CustomSpriteRotatorAnimator : CustomAnimator<SpriteAnimation, SpriteFrame, Sprite>
 {
     public AnimatedSpriteRotator spriteRotator;
     public override void ApplyFrame(Sprite frame) => spriteRotator.targetSprite = frame;
-}
+}*/

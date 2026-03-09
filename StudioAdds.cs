@@ -21,8 +21,8 @@ namespace ABWEvents.LevelStudio;
 
 internal static class StudioAdds
 {
-    internal static List<string> editorHyperEvents { get; private set; } = new List<string>();
-    internal static List<string> editorBonusEvents { get; private set; } = new List<string>();
+    internal readonly static List<string> editorHyperEvents = new List<string>();
+    internal readonly static List<string> editorBonusEvents = new List<string>();
 
     internal static void AddStuffToLevelStudio()
     {
@@ -92,7 +92,7 @@ internal static class StudioAdds
             if (mode.id != "rooms")
             {
                 EditorInterfaceModes.AddToolsToCategory(mode, "items", [new ItemTool("ufospikedball", false), new ItemTool("ufospikedballstacked", false)]);
-                EditorInterfaceModes.AddToolsToCategory(mode, "tools", [
+                EditorInterfaceModes.AddToolsToCategory(mode, "structures", [
                     new GnatSwarmHousingPlacement("gnatswarm_placement", ABWEventsPlugin.assets.Get<Sprite>("gnatswarm_placement")),
                     new TrafficTroubleTunnelTool("traffictrouble_placement", ABWEventsPlugin.assets.Get<Sprite>("traffictrouble_placement")),
                     new GnatSwarmHousingPlacement("nightmares_placement", ABWEventsPlugin.assets.Get<Sprite>("nightmares_placement")),
