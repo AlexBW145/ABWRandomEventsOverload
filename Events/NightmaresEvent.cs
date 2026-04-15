@@ -265,7 +265,7 @@ public class NightmareEntity : NPC
     {
         base.Initialize();
         if (audMan == null) audMan = GetComponent<AudioManager>();
-        navigator.passableObstacles.AddRange([PassableObstacle.Window, PassableObstacle.LockedDoor, PassableObstacle.Bully]); // If I did use all of the modded passable obstacles, then it would bug navigation as a whole because some functions will block cells the opposite way. (Look at Traffic Trouble for more details)
+        navigator.passableObstacles.AddRange([PassableObstacle.BreakableWindow, PassableObstacle.LockedDoor, PassableObstacle.Bully]); // If I did use all of the modded passable obstacles, then it would bug navigation as a whole because some functions will block cells the opposite way. (Look at Traffic Trouble for more details)
         switch (nightmareType)
         {
             case NightmareType.Crawling:
@@ -398,7 +398,7 @@ public class CrawlingHorror_Attacking : NightmareEntity_AttackBase
         nightmare.behaviorStateMachine.ChangeState(new CrawlingHorror_StateBase(nightmare));
     }
 
-    public override void OnStateTriggerEnter(Collider other, bool validCollision)
+    public override void OnStateTriggerEnter(Entity entity,Collider other, bool validCollision)
     {
         if (other.CompareTag("Player"))
         {
@@ -441,7 +441,7 @@ public class Terrorbeak_Attacking : NightmareEntity_AttackBase
         nightmare.behaviorStateMachine.ChangeState(new Terrorbeak_StateBase(nightmare));
     }
 
-    public override void OnStateTriggerEnter(Collider other, bool validCollision)
+    public override void OnStateTriggerEnter(Entity entity,Collider other, bool validCollision)
     {
         if (other.CompareTag("Player"))
         {

@@ -267,9 +267,9 @@ public class Gnat_StateBase : NpcState
             currentNavigationState.UpdatePosition(target.transform.position);
     }
 
-    public override void OnStateTriggerEnter(Collider other, bool validCollision)
+    public override void OnStateTriggerEnter(Entity entity, Collider other, bool validCollision)
     {
-        base.OnStateTriggerEnter(other, validCollision);
+        base.OnStateTriggerEnter(entity, other, validCollision);
         if (other.CompareTag("Player") || other.CompareTag("NPC"))
         {
             bool flag = false;
@@ -311,7 +311,7 @@ public class Gnat_DoNothing : Gnat_StateBase
     {
     }
 
-    public override void OnStateTriggerEnter(Collider other, bool validCollision)
+    public override void OnStateTriggerEnter(Entity entity, Collider other, bool validCollision)
     {
     }
 
@@ -351,7 +351,7 @@ public class Gnat_Cooldown : Gnat_StateBase
     {
     }
 
-    public override void OnStateTriggerEnter(Collider other, bool validCollision)
+    public override void OnStateTriggerEnter(Entity entity, Collider other, bool validCollision)
     {
     }
 }
@@ -382,7 +382,7 @@ public class Gnat_Returning : Gnat_StateBase
     {
     }
 
-    public override void OnStateTriggerEnter(Collider other, bool validCollision)
+    public override void OnStateTriggerEnter(Entity entity, Collider other, bool validCollision)
     {
     }
 }

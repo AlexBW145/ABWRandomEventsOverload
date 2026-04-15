@@ -112,7 +112,7 @@ public class TokenOutrunToken : MonoBehaviour, IEntityTrigger
         }
     }
 
-    public void EntityTriggerEnter(Collider other, bool validCollision)
+    public void EntityTriggerEnter(Entity entity, Collider other, bool validCollision)
     {
         if (!gotTouched && other.isTrigger && validCollision)
         {
@@ -140,11 +140,11 @@ public class TokenOutrunToken : MonoBehaviour, IEntityTrigger
         audMan.PlaySingle(collected);
     }
 
-    public void EntityTriggerStay(Collider other, bool validCollision)
+    public void EntityTriggerStay(Entity entity, Collider other, bool validCollision)
     {
     }
 
-    public void EntityTriggerExit(Collider other, bool validCollision)
+    public void EntityTriggerExit(Entity entity, Collider other, bool validCollision)
     {
     }
 }

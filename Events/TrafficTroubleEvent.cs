@@ -605,11 +605,10 @@ public class TrafficTroubleCar_Wandering : NpcState
         car.Honk();
     }
 
-    public override void OnStateTriggerEnter(Collider other, bool validCollision)
+    public override void OnStateTriggerEnter(Entity entity, Collider other, bool validCollision)
     {
         if ((other.CompareTag("Player") || other.CompareTag("NPC")) && validCollision)
         {
-            var entity = other.gameObject.GetComponent<Entity>();
             if (entity != null)
             {
                 if (other.GetComponent<Balder_Entity>() != null // Considered to be evil.

@@ -202,11 +202,10 @@ public class ITM_SpikedBall : Item, IEntityTrigger
     private bool outOfPlayerCol = false;
     public CustomSpriteRotatorAnimator animator;
 
-    public void EntityTriggerEnter(Collider other, bool validCollision)
+    public void EntityTriggerEnter(Entity entity, Collider other, bool validCollision)
     {
         if (((other.CompareTag("Player") && outOfPlayerCol) || other.CompareTag("NPC")) && validCollision)
         {
-            var entity = other.GetComponent<Entity>();
             if (entity != null && !SpikeBallFlinger.Flingza.Contains(entity))
             {
                 var component = Instantiate(flinger, other.transform.position, default);
@@ -234,13 +233,13 @@ public class ITM_SpikedBall : Item, IEntityTrigger
         entity?.SetTrigger(true);
     }
 
-    public void EntityTriggerExit(Collider other, bool validCollision)
+    public void EntityTriggerExit(Entity entity, Collider other, bool validCollision)
     {
         if (other.CompareTag("Player"))
             outOfPlayerCol = true;
     }
 
-    public void EntityTriggerStay(Collider other, bool validCollision)
+    public void EntityTriggerStay(Entity entity, Collider other, bool validCollision)
     {
     }
 
