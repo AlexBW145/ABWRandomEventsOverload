@@ -38,7 +38,7 @@ public class ABWEventsPlugin : BaseUnityPlugin
 {
     internal const string PLUGIN_GUID = "alexbw145.bbplus.eventsoverload";
     private const string PLUGIN_NAME = "AlexBW145's Events Overload";
-    private const string PLUGIN_VERSION = "1.0.5";
+    private const string PLUGIN_VERSION = "1.0.6";
 
     internal static new ManualLogSource Logger;
     internal static AssetManager assets = new AssetManager();
@@ -101,19 +101,19 @@ This is actually an early access release...", false);*/
         {
             return new Dictionary<string, string>()
             {
-                { "Sfx_GnatIdling", "*BUZZING SOUNDS*" },
-                { "Sfx_Gnattack", "*TACKLE!*" },
-                { "Sfx_TrafficTrouble_Horn", "*BEEP*" },
-                { "Sfx_TrafficTrouble_IMPACT", "*BAOMP!*" },
-                { "Sfx_MissleShuffleStrike_IncomingPre", "*BLING!*" },
-                { "Sfx_MissleShuffleStrike_Incoming", "*Missile target incoming...*" },
-                { "Sfx_MissleShuffleStrike_Exploded", "*BOOM!*" },
-                { "Sfx_UFOSmasher_UFOIdle", "*Humming noises*" },
-                { "Sfx_UFOSmasher_SpikeballImpact", "*BUMP!*" },
-                { "Sfx_UFOSmasher_UFOSpawn", "*Swooshing humming noises*" },
-                { "Sfx_UFOSmasher_UFODespawn", "*Swooshing humming noises*" },
-                { "Sfx_UFOSmasher_SpikeballRoll", "*Rolling...*" },
-                { "Sfx_UFOSmasher_UFODies", "*Malfunction noises!*" },
+                { "Sfx_GnatIdling", "[BUZZING SOUNDS]" },
+                { "Sfx_Gnattack", "[TACKLE!]" },
+                { "Sfx_TrafficTrouble_Horn", "[BEEP]" },
+                { "Sfx_TrafficTrouble_IMPACT", "[BAOMP!]" },
+                { "Sfx_MissleShuffleStrike_IncomingPre", "[BLING!]" },
+                { "Sfx_MissleShuffleStrike_Incoming", "[Missile target incoming...]" },
+                { "Sfx_MissleShuffleStrike_Exploded", "[BOOM!]" },
+                { "Sfx_UFOSmasher_UFOIdle", "[Humming noises]" },
+                { "Sfx_UFOSmasher_SpikeballImpact", "[BUMP!]" },
+                { "Sfx_UFOSmasher_UFOSpawn", "[Swooshing humming noises]" },
+                { "Sfx_UFOSmasher_UFODespawn", "[Swooshing humming noises]" },
+                { "Sfx_UFOSmasher_SpikeballRoll", "[Rolling...]" },
+                { "Sfx_UFOSmasher_UFODies", "[Malfunction noises!]" },
 
                 { "Itm_SpikedBallBonus", "Spiked Ball ({0})" },
                 { "Desc_SpikedBallBonus", "Spiked Ball\nA spiked ball that can destroy ufos.\nYou can also use it towards Baldi and his friends too!" },
