@@ -151,14 +151,15 @@ class GeneratorPatches
     static void MissleModeAssign()
     {
         if (!ABWEventsPlugin.missleChaos.Value) return;
-        if (CoreGameManager.Instance.sceneObject.name == "MainLevel_5" || (CoreGameManager.Instance.nextLevel?.name == "MainLevel_5" && BaseGameManager.Instance.InPitstop()))
+        if (CoreGameManager.Instance.sceneObject.name == "MainLevel_5" || (CoreGameManager.Instance.nextLevel?.name == "MainLevel_5" && CoreGameManager.Instance.sceneObject.manager is PitstopGameManager))
         {
             var rng = new System.Random(CoreGameManager.Instance.Seed() + 4);
+            var chance = rng.NextDouble() < (double)0.1f;
             if (CoreGameManager.Instance.sceneObject.name == "MainLevel_5"
-            && rng.NextDouble() < (double)0.1f) // 10% chance for doomsday
+            && chance) // 10% chance for doomsday
                 CoreGameManager.Instance.sceneObject = missleShuffleObject;
-            else if (CoreGameManager.Instance.nextLevel?.name == "MainLevel_5" && BaseGameManager.Instance.InPitstop()
-                && rng.NextDouble() < (double)0.1f)
+            else if (CoreGameManager.Instance.nextLevel?.name == "MainLevel_5" && CoreGameManager.Instance.sceneObject.manager is PitstopGameManager
+                && chance)
                 CoreGameManager.Instance.nextLevel = missleShuffleObject;
         }
     }
