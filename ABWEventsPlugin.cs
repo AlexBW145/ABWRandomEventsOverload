@@ -38,7 +38,7 @@ public class ABWEventsPlugin : BaseUnityPlugin
 {
     internal const string PLUGIN_GUID = "alexbw145.bbplus.eventsoverload";
     private const string PLUGIN_NAME = "AlexBW145's Events Overload";
-    private const string PLUGIN_VERSION = "1.0.6";
+    private const string PLUGIN_VERSION = "1.0.7";
 
     internal static new ManualLogSource Logger;
     internal static AssetManager assets = new AssetManager();
