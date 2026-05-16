@@ -842,8 +842,6 @@ This is actually an early access release...", false);*/
         nightmare.audMan.audioDevice = nightmare.GetComponent<AudioSource>();
         DestroyImmediate(nightmare.GetComponent<PropagatedAudioManager>());
         nightmare.audMan.volumeModifier = 0.65f;
-        nightmare.gameObject.AddComponent<AudioReverbFilter>().reverbPreset = AudioReverbPreset.Psychotic;
-        nightmare.gameObject.AddComponent<AudioEchoFilter>().delay = 0.1f;
         nightmare.spriteRenderer[0].sprite = NPCMetaStorage.Instance.Get(Character.Cumulo).value.spriteRenderer[0].sprite;
         nightmare.Navigator.SetSpeed(10f);
         nightmare.Navigator.maxSpeed = 10f;
@@ -868,8 +866,6 @@ This is actually an early access release...", false);*/
         terror.audMan.audioDevice = terror.GetComponent<AudioSource>();
         terror.audMan.volumeModifier = 0.65f;
         DestroyImmediate(terror.GetComponent<PropagatedAudioManager>());
-        terror.gameObject.AddComponent<AudioReverbFilter>().reverbPreset = AudioReverbPreset.Psychotic;
-        terror.gameObject.AddComponent<AudioEchoFilter>().delay = 0.1f;
         terror.nightmareType = NightmareType.Terror;
         terror.spriteRenderer[0].sprite = NPCMetaStorage.Instance.Get(Character.Crafters).value.spriteRenderer[0].sprite;
         terror.Navigator.SetSpeed(35f);

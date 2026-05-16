@@ -265,6 +265,8 @@ public class NightmareEntity : NPC
     {
         base.Initialize();
         if (audMan == null) audMan = GetComponent<AudioManager>();
+        audMan.audioSourceManager.GetAudioSource(SoundType.Voice).gameObject.AddComponent<AudioReverbFilter>().reverbPreset = AudioReverbPreset.Psychotic;
+        audMan.audioSourceManager.GetAudioSource(SoundType.Voice).gameObject.AddComponent<AudioEchoFilter>().delay = 0.1f;
         navigator.passableObstacles.AddRange([PassableObstacle.BreakableWindow, PassableObstacle.LockedDoor, PassableObstacle.Bully]); // If I did use all of the modded passable obstacles, then it would bug navigation as a whole because some functions will block cells the opposite way. (Look at Traffic Trouble for more details)
         switch (nightmareType)
         {
