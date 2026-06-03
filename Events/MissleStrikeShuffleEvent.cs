@@ -77,6 +77,7 @@ public class MissleStrikeShuffleGuy : NPC
         {
             var strike = Instantiate(strikePre);
             strike.transform.position = target;
+            strike.audMan.volumeModifier = 1f / targets.Length;
             strike.Initialize(ec);
         }
     }

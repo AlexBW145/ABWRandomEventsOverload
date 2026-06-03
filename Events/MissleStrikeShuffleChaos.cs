@@ -1,6 +1,7 @@
 ﻿using HarmonyLib;
 using MidiPlayerTK;
 using MTM101BaldAPI;
+using MTM101BaldAPI.SaveSystem;
 using System.Collections;
 using System.Reflection;
 using UnityEngine;
@@ -75,8 +76,8 @@ public class MissleStrikeShuffleGameManager : BaseGameManager
         CoreGameManager.Instance.GetCamera(0).matchTargetRotation = false;
         CoreGameManager.Instance.audMan.volumeModifier = 0.6f;
         StartCoroutine((IEnumerator)_EndSequence.Invoke(CoreGameManager.Instance, []));
-        Singleton<InputManager>.Instance.Rumble(1f, 2f);
-        Singleton<HighlightManager>.Instance.Highlight("steam_x", LocalizationManager.Instance.GetLocalizedText("Steam_Highlight_Lose"), string.Format(LocalizationManager.Instance.GetLocalizedText("Steam_Highlight_Lose_Desc"), LocalizationManager.Instance.GetLocalizedText(managerNameKey), LocalizationManager.Instance.GetLocalizedText(CoreGameManager.Instance.sceneObject.nameKey)), 2u, 0f, 0f, TimelineEventClipPriority.Standard);
+        InputManager.Instance.Rumble(1f, 2f);
+        HighlightManager.Instance.Highlight("steam_x", LocalizationManager.Instance.GetLocalizedText("Steam_Highlight_Lose"), string.Format(LocalizationManager.Instance.GetLocalizedText("Steam_Highlight_Lose_Desc"), LocalizationManager.Instance.GetLocalizedText(managerNameKey), LocalizationManager.Instance.GetLocalizedText(CoreGameManager.Instance.sceneObject.nameKey)), 2u, 0f, 0f, TimelineEventClipPriority.Standard);
     }
 
     public override void Initialize()
@@ -91,7 +92,7 @@ public class MissleStrikeShuffleGameManager : BaseGameManager
         shuffleEvent.Initialize(ec, new System.Random(CoreGameManager.Instance.Seed() + CoreGameManager.Instance.sceneObject.levelNo));
         var crng = new System.Random(CoreGameManager.Instance.Seed() + CoreGameManager.Instance.sceneObject.levelNo);
         foreach (var cell in ec.lights)
-            if (crng.NextDouble() < (float)0.5f)
+            if (crng.NextDouble() < (double)0.5f)
                 cell.SetLight(false);
     }
 
@@ -99,6 +100,9 @@ public class MissleStrikeShuffleGameManager : BaseGameManager
     {
         base.BeginPlay();
         MusicManager.Instance.PlayMidi("TimeOut_MMP_Corrected", true);
+        ModdedFileManager.Instance.saveData.saveAvailable = false;
+        PlayerFileManager.Instance.savedGameData.saveAvailable = false;
+        PlayerFileManager.Instance.Save();
     }
 
     // This method is from Level Studio although its for stealthy shit.
@@ -129,8 +133,20 @@ public class MissleStrikeShuffleGameManager : BaseGameManager
 
     public override void LoadNextLevel()
     {
-        HighlightManager.Instance.Highlight("steam_completed", LocalizationManager.Instance.GetLocalizedText("Steam_Highlight_Win"), string.Format(LocalizationManager.Instance.GetLocalizedText("Steam_Highlight_Win_Desc"), base.CurrentLevel + 1), 2u, 0f, 0f, TimelineEventClipPriority.Standard);
-        int stickerBonuses = CoreGameManager.Instance.GetStickerBonuses(ec.RemainingTime, (ec.GetBaldi() != null) ? ec.NavigableDistance(ec.CellFromPosition(CoreGameManager.Instance.GetPlayer(0).transform.position), ec.CellFromPosition(ec.GetBaldi().transform.position), PathType.Nav) : 0, ec.map.PlayerDiscoveredCells);
+        HighlightManager.Instance.Highlight("steam_completed", LocalizationManager.Instance.GetLocalizedText("Steam_Highlight_Win"), string.Format(LocalizationManager.Instance.GetLocalizedText("Steam_Highlight_Win_Desc"), CurrentLevel + 1), 2u, 0f, 0f, TimelineEventClipPriority.Standard);
+        int distBonus = 0;
+        if (ec.GetBaldi() != null)
+        {
+            distBonus = ec.NavigableDistance(ec.CellFromPosition(CoreGameManager.Instance.GetPlayer(0).transform.position), ec.CellFromPosition(ec.GetBaldi().transform.position), PathType.Nav);
+            if (distBonus < 0)
+            {
+                distBonus = ec.NavigableDistance(ec.CellFromPosition(CoreGameManager.Instance.GetPlayer(0).transform.position), ec.CellFromPosition(ec.GetBaldi().transform.position), PathType.Const) * 2;
+                if (distBonus < 0)
+                    distBonus = 100;
+            }
+        }
+
+        int stickerBonuses = CoreGameManager.Instance.GetStickerBonuses(ec.RemainingTime, distBonus, ec.map.PlayerDiscoveredCells);
         CoreGameManager.Instance.AddPoints(stickerBonuses, 0, playAnimation: false, includeInLevelTotal: false, multiply: true);
         CoreGameManager.Instance.saveMapAvailable = false;
         CoreGameManager.Instance.saveMapPurchased = false;
@@ -165,7 +181,7 @@ public class MissleStrikeShuffleGameManager : BaseGameManager
     {
         CoreGameManager.Instance.saveMapAvailable = true;
         PrepareToLoad();
-        elevatorScreen = Object.Instantiate(elevatorScreenPre);
+        elevatorScreen = Instantiate(elevatorScreenPre);
         elevatorScreen.OnLoadReady += base.RestartLevel;
         elevatorScreen.Initialize();
         CoreGameManager.Instance.GetPoints(0);

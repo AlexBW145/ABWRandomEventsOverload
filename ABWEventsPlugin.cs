@@ -466,7 +466,7 @@ This is actually an early access release...", false);*/
         var ufo = AssetLoader.ModelFromMod(this, "Models", "UFOSmashable.obj");
         var ufoMat = Instantiate(elv0);
         ufoMat.name = "UFOSmashable";
-        ufoMat.SetMainTexture(AssetLoader.TextureFromMod(this, "Models", "UFOSmashable.png"));
+        ufoMat.SetMainTexture(AssetLoader.TextureFromMod(this, "Models", "UFOSmashable_Transparent.png"));
         ufoMat.SetTexture("_LightGuide", AssetLoader.TextureFromMod(this, "Models", "UFOlightmap.png"));
         ufoMat.EnableKeyword("_ALPHATEST_ON");
         ufo.transform.GetChild(0).GetComponent<Renderer>().SetMaterial(ufoMat);
