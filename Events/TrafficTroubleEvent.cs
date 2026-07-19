@@ -10,9 +10,11 @@ namespace ABWEvents.Events;
 
 public class TrafficTroubleEvent : RandomEvent
 {
+    private static Texture2D dark = Resources.FindObjectsOfTypeAll<Texture2D>().Last(x => x.name == "BlackTexture" && x.isReadable);
     [SerializeField] internal Material[] roads = new Material[16];
     [SerializeField] internal GameObject roadPrefab;
-    [SerializeField] internal TrafficTroubleTunnel tunnel;
+    [SerializeField] internal RoomCategory cat;
+    //[SerializeField] internal TrafficTroubleTunnel tunnel;
     //private DijkstraMap _roadPlacementMap;
     private Dictionary<Cell, Tuple<MeshRenderer, int>> createdRoads = new Dictionary<Cell, Tuple<MeshRenderer, int>>();
     [SerializeField, Range(4, 64)] internal int minRoads = 4, maxRoads = 6;
@@ -21,19 +23,38 @@ public class TrafficTroubleEvent : RandomEvent
     [SerializeField] internal float timerInitial = 4f;
     private float timerUntilNextCar;
     private int nextElevatorPos = 0;
-
-    internal static TrafficTroubleEvent Instance { get; private set; }
+    [SerializeField] internal RoomGroup tunnelRoomGroup = new()
+    {
+        wallTexture = [new() { selection = dark, weight = 99 }],
+        ceilingTexture = [new() { selection = dark, weight = 99 }],
+        floorTexture = [new() { selection = dark, weight = 99 }],
+        name = "TrafficTroubleRoadSpawners",
+        stickToHallChance = 1,
+        overridePositionWeighting = true,
+        light = [new() { selection = null, weight = 99 }],
+        centerWeightMultiplier = 0.5f,
+        dijkstraWeightPower = 1.6f,
+        dijkstraWeightValueMultiplier = 0.3f,
+        potentialRooms = []
+    };
+    internal static EnvironmentController.TempObstacleManagement
+        tempOpenTunnels, tempCloseTunnels,
+        tempOpenRoads, tempCloseRoads;
 
     public override void Initialize(EnvironmentController controller, System.Random rng)
     {
         base.Initialize(controller, rng);
-        Instance = this;
+        tunnelRoomGroup.minRooms = minRoads; tunnelRoomGroup.maxRooms = maxRoads;
+        var lb = FindObjectsOfType<LevelBuilder>(false).Last(x => x.Ec == controller);
+        if (lb is LevelGenerator)
+            lb.ld.roomGroup.Insert(0, tunnelRoomGroup);
+            
     }
 
     private void OnDestroy()
     {
-        if (Instance == this)
-            Instance = null;
+        tempOpenRoads -= TempOpen;
+        tempCloseRoads -= TempClose;
     }
 
     public override void Begin()
@@ -93,18 +114,10 @@ public class TrafficTroubleEvent : RandomEvent
             }
         }
     }
-
-    private List<Cell> premadeElevators;
     public override void PremadeSetup()
     {
         base.PremadeSetup();
-        premadeElevators = new List<Cell>();
-        LevelLoader loader = FindObjectOfType<LevelLoader>(false);
-        foreach (var points in FindObjectsOfType<TunnelPlacement>(false))
-        {
-            points.ll = loader;
-            points.MarkAsFound(this);
-        }
+        var premadeElevators = ec.rooms.FindAll(x => x.category == cat && x.type == RoomType.Room).SelectMany(x => x.cells).ToList();
         var possibleCombinations = new List<Tuple<Cell, Cell>>();
         for (int elv = 0; elv < premadeElevators.Count; elv++)
         {
@@ -143,16 +156,20 @@ public class TrafficTroubleEvent : RandomEvent
             }
             list[i].Value.Item1.SetMaterial(roads[createdRoads[list[i].Key].Item2]);
         }
-        ec.TempCloseBully();
+        tempOpenRoads += TempOpen;
+        tempCloseRoads += TempClose;
     }
 
+    [Obsolete("Replaced by the new system introducted in v0.14.3")]
     internal class TunnelPlacement : TileBasedObject, IEventSpawnPlacement
     {
         internal LevelLoader ll;
 
         public Cell GetCellPos(EnvironmentController ec) => ec.CellFromPosition(ec.CellFromPosition(transform.position).position + direction.ToIntVector2());
+        [Obsolete("Replaced by the new system introducted in v0.14.3", true)]
         public void MarkAsFound(RandomEvent _event)
         {
+#if false
             var traffictrouble = (TrafficTroubleEvent)_event;
             var pos = GetCellPos(traffictrouble.ec).position;
             var oppositeDirection = direction.GetOpposite();
@@ -177,9 +194,56 @@ public class TrafficTroubleEvent : RandomEvent
             cell.hideFromMap = true;
             traffictrouble.premadeElevators.Add(cell);
             Destroy(gameObject);
+#endif
         }
     }
 
+    public override void AfterUpdateSetup(System.Random rng)
+    {
+        base.AfterUpdateSetup(rng);
+        var elevators = ec.rooms.FindAll(x => x.category == cat && x.type == RoomType.Room).SelectMany(x => x.cells).ToList();
+        var possibleCombinations = new List<Tuple<Cell, Cell>>();
+        for (int elv = 0; elv < elevators.Count; elv++)
+        {
+            var otherelvs = elevators.Where(x => x != elevators[elv]).ToList();
+            for (int other = 0; other < otherelvs.Count; other++)
+                possibleCombinations.Add(new Tuple<Cell, Cell>(elevators[elv], otherelvs[other]));
+        }
+        for (int elv = 0; elv < possibleCombinations.Count; elv++)
+        {
+            if (!GenerateRoad(possibleCombinations[elv].Item1, possibleCombinations[elv].Item2))
+                ABWEventsPlugin.Logger.LogWarning("One of the traffic trouble building thingies have failed or got an error.");
+            else
+            {
+                if (!spawnPoints.Contains(possibleCombinations[elv].Item1.position))
+                    spawnPoints.Add(possibleCombinations[elv].Item1.position);
+                if (!spawnPoints.Contains(possibleCombinations[elv].Item2.position))
+                    spawnPoints.Add(possibleCombinations[elv].Item2.position);
+            }
+        }
+        var list = createdRoads.ToList();
+        for (int i = 0; i < list.Count; i++)
+        {
+            for (int dir = 0; dir < 4; dir++)
+            {
+                if (!ec.ContainsCoordinates(list[i].Key.position + ((Direction)dir).ToIntVector2())) continue;
+                var othercell = ec.CellFromPosition(list[i].Key.position + ((Direction)dir).ToIntVector2());
+                if ((createdRoads.ContainsKey(othercell) || spawnPoints.Contains(othercell.position))
+                    && list[i].Value.Item2.ContainsDirection((Direction)dir)
+                    && !list[i].Key.ConstBin.ContainsDirection((Direction)dir))
+                {
+                    int tileshape = createdRoads[list[i].Key].Item2 - (1 << dir);
+                    list[i].Value.Item1.transform.parent.rotation = BinToRotation(tileshape);
+                    createdRoads[list[i].Key] = new Tuple<MeshRenderer, int>(list[i].Value.Item1, tileshape);
+                }
+            }
+            list[i].Value.Item1.SetMaterial(roads[createdRoads[list[i].Key].Item2]);
+        }
+        tempOpenRoads += TempOpen;
+        tempCloseRoads += TempClose;
+    }
+
+#if false
     public override void AfterUpdateSetup(System.Random rng)
     {
         LevelGenerator lg = FindObjectOfType<LevelGenerator>(false);
@@ -284,11 +348,12 @@ public class TrafficTroubleEvent : RandomEvent
     }
 
     int roomId = 0;
-    private static Texture2D dark = Resources.FindObjectsOfTypeAll<Texture2D>().Last(x => x.name == "BlackTexture" && x.isReadable);
+#endif
+    [Obsolete("Replaced by the new system introducted in v0.14.3", true)]
     RoomController CreateTunnelRoom(LevelBuilder lg, IntVector2 position, Direction dir)
     {
         var elevatorRoom = Instantiate(lg.roomControllerPre, ec.transform);
-        elevatorRoom.name = "TrafficTroubleTunnel_" + (++roomId);
+        elevatorRoom.name = "TrafficTroubleTunnel_";// + (++roomId);
         elevatorRoom.ec = ec;
         elevatorRoom.color = Color.gray;
         elevatorRoom.transform.localPosition = Vector3.zero;
@@ -336,7 +401,7 @@ public class TrafficTroubleEvent : RandomEvent
         {
             Cell cell = ec.CellFromPosition(path[i - 1]);
             Cell nextCell = ec.CellFromPosition(path[i]);
-            if (cell?.room?.category == RoomCategory.Null)
+            if (cell?.room?.category == cat)
                 continue;
             Direction direction = Directions.FromPointAToB(cell.position, nextCell.position);
             if (createdRoads.ContainsKey(cell))
@@ -401,8 +466,8 @@ public class TrafficTroubleTunnel : Door
     public override void Initialize()
     {
         base.Initialize();
-        ec.tempOpenBully += TempOpen;
-        ec.tempCloseBully += TempClose;
+        TrafficTroubleEvent.tempOpenTunnels += TempOpen;
+        TrafficTroubleEvent.tempCloseTunnels += TempClose;
     }
 
     private void TempOpen()
@@ -417,6 +482,18 @@ public class TrafficTroubleTunnel : Door
         ec.FreezeNavigationUpdates(true);
         Block(true);
         ec.FreezeNavigationUpdates(false);
+    }
+
+    public override void UnInitialize()
+    {
+        base.UnInitialize();
+        OnDestroy();
+    }
+
+    private void OnDestroy()
+    {
+        TrafficTroubleEvent.tempOpenTunnels -= TempOpen;
+        TrafficTroubleEvent.tempCloseTunnels -= TempClose;
     }
 
     private void Start()

@@ -39,9 +39,15 @@ internal static class LoaderAdds
         var trafficplacement = new GameObject("Traffic Tunnel Placement", typeof(TrafficTroubleEvent.TunnelPlacement));
         trafficplacement.ConvertToPrefab(true);
         var trafficevent = (TrafficTroubleEvent)ABWEventsPlugin.assets.Get<RandomEvent>("TrafficTrouble");
-        var quad = GameObject.Instantiate(trafficevent.tunnel.walls[0], trafficplacement.transform, false);
+        /*var quad = GameObject.Instantiate(trafficevent.tunnel.walls[0], trafficplacement.transform, false);
         quad.SetMaterial(trafficevent.tunnel.overlayShut[0]);
-        quad.transform.localPosition = new Vector3(0f, 5f, 5f);
+        quad.transform.localPosition = new Vector3(0f, 5f, 5f);*/
+        var trafficroom = ABWEventsPlugin.assets.Get<RoomAsset>("TTRoom");
+        LevelLoaderPlugin.Instance.roomSettings.Add("traffictrouble_room", new RoomSettings(trafficroom.category, trafficroom.type, trafficroom.color, LevelLoaderPlugin.Instance.assetMan.Get<StandardDoorMats>("DefaultDoorSet"))
+        {
+            container = trafficroom.roomFunctionContainer
+        });
+        LevelLoaderPlugin.Instance.doorPrefabs.Add("traffictrouble_placement", ABWEventsPlugin.assets.Get<TrafficTroubleTunnel>("TTTunnel"));
         LevelLoaderPlugin.Instance.tileBasedObjectPrefabs.Add("traffictrouble_placement", trafficplacement.GetComponent<TrafficTroubleEvent.TunnelPlacement>());
         var fissurePlacement = new GameObject("Nightmares Placement", typeof(NightmaresEvent.FissurePlacement));
         fissurePlacement.ConvertToPrefab(true);

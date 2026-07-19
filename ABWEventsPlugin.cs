@@ -38,11 +38,11 @@ public class ABWEventsPlugin : BaseUnityPlugin
 {
     internal const string PLUGIN_GUID = "alexbw145.bbplus.eventsoverload";
     private const string PLUGIN_NAME = "AlexBW145's Events Overload";
-    private const string PLUGIN_VERSION = "1.0.8";
+    private const string PLUGIN_VERSION = "1.0.9";
 
     internal static new ManualLogSource Logger;
     internal static AssetManager assets = new AssetManager();
-    internal static PassableObstacle trafficPath;
+    internal static PassableObstacle trafficPath, trafficTunnelObstacle;
     public static SoundObject _bonusJingle => assets.Get<SoundObject>("EventJingles/Bonus");
     public static SoundObject _hyperJingle => assets.Get<SoundObject>("EventJingles/Hyper");
     internal static ConfigEntry<bool> instantHyper { get; private set; }
@@ -180,8 +180,10 @@ This is actually an early access release...", false);*/
 
                 { "Ed_Tool_gnatswarm_placement_Title", "Gnat House" },
                 { "Ed_Tool_gnatswarm_placement_Desc", "Houses a bunch of gnats." },
-                { "Ed_Tool_traffictrouble_placement_Title", "Traffic Tunnel" },
-                { "Ed_Tool_traffictrouble_placement_Desc", "Constructs a tunnel for traffic to flow." },
+                { "Ed_Tool_door_traffictrouble_placement_Title", "Traffic Tunnel" },
+                { "Ed_Tool_door_traffictrouble_placement_Desc", "A tunnel that are only for cars to pass through." },
+                { "Ed_Tool_room_traffictrouble_room_Title", "Traffic Tunnel Room" },
+                { "Ed_Tool_room_traffictrouble_room_Desc", "Constructs a tunnel for traffic to flow." },
                 { "Ed_Tool_nightmares_placement_Title", "Nightmare Fissure" },
                 { "Ed_Tool_nightmares_placement_Desc", "Evil residue containment and will always be real." },
                 { "Ed_Tool_item_ufospikedball_Title", "Spiked Ball" },
@@ -397,7 +399,7 @@ This is actually an early access release...", false);*/
             AssetLoader.TextureFromMod(this, "Texture2D", "TrafficTrouble", "Straight.png"),
             AssetLoader.TextureFromMod(this, "Texture2D", "TrafficTrouble", "ThreeWay.png"),
             AssetLoader.TextureFromMod(this, "Texture2D", "TrafficTrouble", "End.png"),
-            AssetLoader.TextureFromMod(this, "Texture2D", "TrafficTrouble", "TrafficTunnel.png"),
+            AssetLoader.TextureFromMod(this, "Texture2D", "TrafficTrouble", "TrafficTunnel_Transparent.png"),
             AssetLoader.TextureFromMod(this, "Texture2D", "TrafficTrouble", "TrafficTunnelMask.png"),
 
             AssetLoader.TextureFromMod(this, "Texture2D", "Nightmares", "Fissure.png"),
@@ -720,7 +722,17 @@ This is actually an early access release...", false);*/
         tunnelMask.SetMaskTexture(assets.Get<Texture2D>("TrafficTrouble/TunnelMask"));
         trafficTunnel.mask = [tunnelMask, tunnelMask];
         trafficTunnel.makesNoise = false;
-        trafficTrouble.tunnel = trafficTunnel;
+        trafficTrouble.cat = EnumExtensions.ExtendEnum<RoomCategory>("ABWEvents_TrafficTroubleSpawner");
+        var trafficRoom = Instantiate(AssetFinder.FindOfTypeWithName<RoomAsset>("Room_EventSpawnRoom", true));
+        trafficRoom.name = "Room_TrafficTroubleSpawnRoom";
+        ((UnityEngine.Object)trafficRoom).name = "Room_TrafficTroubleSpawnRoom";
+        trafficRoom.roomFunctionContainer = Instantiate(trafficRoom.roomFunctionContainer, MTM101BaldiDevAPI.prefabTransform);
+        trafficRoom.roomFunctionContainer.gameObject.name = "TrafficTroubleSpawnRoom";
+        trafficRoom.roomFunctionContainer.GetComponent<DoorAssignerRoomFunction>().ReflectionSetVariable("doorPre", trafficTunnel);
+        trafficRoom.category = trafficTrouble.cat;
+        trafficTrouble.tunnelRoomGroup.potentialRooms = [new() { selection = trafficRoom, weight = 99}];
+        assets.Add("TTRoom", trafficRoom);
+        assets.Add("TTTunnel", trafficTunnel);
 
         TrafficTroubleCar trafficCar = new NPCBuilder<TrafficTroubleCar>(Info)
             .SetName("Traffic Trouble Car")
@@ -741,8 +753,8 @@ This is actually an early access release...", false);*/
         lookerLayerMask.SetValue(trafficCar.looker, (LayerMask)LayerMask.GetMask("Default", "Block Raycast", "Player", "NPCs", "Windows"));
         trafficCar.Navigator.maxSpeed = 35f;
         trafficCar.Navigator.accel = 35f;
-        trafficPath = EnumExtensions.ExtendEnum<PassableObstacle>("TrafficTroubleRoad");
-        trafficCar.Navigator.passableObstacles.AddRange([trafficPath, PassableObstacle.Bully, PassableObstacle.LockedDoor]);
+        trafficPath = EnumExtensions.ExtendEnum<PassableObstacle>("TrafficTroubleRoad"); trafficTunnelObstacle = EnumExtensions.ExtendEnum<PassableObstacle>("TrafficTroubleTunnelway");
+        trafficCar.Navigator.passableObstacles.AddRange([trafficPath, trafficTunnelObstacle, PassableObstacle.Bully, PassableObstacle.LockedDoor]);
         PropagatedAudioManager motorAudMan = trafficCar.gameObject.AddComponent<PropagatedAudioManager>();
         motorAudMan.audioDevice = trafficCar.gameObject.AddComponent<AudioSource>();
         motorAudMan.audioDevice.spatialBlend = 1;
@@ -1035,9 +1047,12 @@ This is actually an early access release...", false);*/
         // Student Shuffle
         StudentEvent shuffleHyperEvent = Instantiate(Resources.FindObjectsOfTypeAll<StudentEvent>().Last(), MTM101BaldiDevAPI.prefabTransform);
         shuffleHyperEvent.gameObject.name = "Hyper " + shuffleHyperEvent.gameObject.name.Replace("(Clone)", "");
-        shuffleHyperEvent.ReflectionSetVariable("minCrowdSize", 30);
-        shuffleHyperEvent.ReflectionSetVariable("maxCrowdSize", 59);
-        //shuffleHyperEvent.ReflectionSetVariable("spawnRate", 5f);
+        shuffleHyperEvent.ReflectionSetVariable("pushSpeed", 15f * 3f);
+        shuffleHyperEvent.ReflectionSetVariable("totalFollowersToSpawn", 128 * 3);
+        var _leaderstudentField = AccessTools.DeclaredField(typeof(StudentEvent), "crowdLeaderPrefab");
+        var theleaderofall = Instantiate((StudentCrowd_Leader)_leaderstudentField.GetValue(shuffleHyperEvent), MTM101BaldiDevAPI.prefabTransform);
+        theleaderofall.Navigator.maxSpeed *= 2f;
+        _leaderstudentField.SetValue(shuffleHyperEvent, theleaderofall);
         shuffleHyperEvent.MarkAsCrazy();
         //RandomEventMetaStorage.Instance.Add(new RandomEventMetadata(Info, shuffleHyperEvent, RandomEventFlags.Special));
         // Balder Dash

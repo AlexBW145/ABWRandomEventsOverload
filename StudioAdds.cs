@@ -16,6 +16,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 namespace ABWEvents.LevelStudio;
 
@@ -59,9 +60,14 @@ internal static class StudioAdds
         var visual = EditorInterface.AddTileBasedObjectVisual("gnatswarm_placement", LevelLoaderPlugin.Instance.tileBasedObjectPrefabs["gnatswarm_placement"].gameObject);
         visual.AddComponent<SphereCollider>().radius = 3.5f;
         visual.GetComponent<SphereCollider>().center = Vector3.up * 1f;
+        // Obsoleted by Baldi's Basics Plus v0.14.3
         visual = EditorInterface.AddTileBasedObjectVisual("traffictrouble_placement", LevelLoaderPlugin.Instance.tileBasedObjectPrefabs["traffictrouble_placement"].gameObject);
         visual.AddComponent<BoxCollider>().size = new Vector3(0.5f, 5f, 5f);
         visual.GetComponent<BoxCollider>().center = new Vector3(0f, 5f, 5f);
+        //
+        var tunnel = ABWEventsPlugin.assets.Get<TrafficTroubleTunnel>("TTTunnel");
+        EditorInterface.AddDoor<DoorDisplay>("traffictrouble_placement", DoorIngameStatus.AlwaysDoorNoSmart, tunnel.mask.First(), tunnel.overlayOpen);
+        LevelStudioPlugin.Instance.defaultRoomTextures.Add("traffictrouble_room", new("Black", "Black", "Black"));
         visual = EditorInterface.AddTileBasedObjectVisual("nightmares_placement", LevelLoaderPlugin.Instance.tileBasedObjectPrefabs["nightmares_placement"].gameObject);
         visual.AddComponent<SphereCollider>().radius = 5f;
         visual.GetComponent<SphereCollider>().center = Vector3.up * 1f;
@@ -73,15 +79,46 @@ internal static class StudioAdds
         //
         LevelStudioPlugin.Instance.editorLevelPreLoadCallbacks.Add((mode, levelData) => // Older builds uses a workaround.
         {
+            static void CreateTunnelRoom(IntVector2 pos, Direction oppositeDirection)
+            {
+                var elevatorRoom = EditorController.Instance.levelData.CreateRoomWithDefaultSettings("traffictrouble_room");
+                EditorController.Instance.SetupVisualsForRoom(elevatorRoom);
+                var areaRoom = new RectCellArea(pos, new(1,1), (ushort)(EditorController.Instance.levelData.rooms.Count + 1));
+
+                var door = new DoorLocation();
+                door.position = pos;
+                door.type = "traffictrouble_placement";
+                door.direction = oppositeDirection;
+
+                EditorController.Instance.levelData.rooms.Add(elevatorRoom);
+                EditorController.Instance.levelData.areas.Add(areaRoom);
+                EditorController.Instance.levelData.doors.Add(door);
+            }
             for (int i = levelData.structures.Count - 1; i >= 0; i--)
             {
                 var structure = levelData.structures[i];
-                if (structure.type == "gnatswarm_placement" || structure.type == "traffictrouble_placement" || structure.type == "nightmares_placement")
+                if (structure.type == "gnatswarm_placement" || structure.type == "nightmares_placement")
                 {
                     var old = (HallDoorStructureLocation)structure;
                     foreach (var item in old.myChildren)
                         EditorController.Instance.levelData.tileBasedObjects.Add(InsertTileBasedObject(item));
                     levelData.structures.RemoveAt(i);
+                }
+                else if (structure.type == "traffictrouble_placement")
+                {
+                    var old = (HallDoorStructureLocation)structure;
+                    foreach (var item in old.myChildren)
+                        CreateTunnelRoom(item.position + item.direction.ToIntVector2(), item.direction.GetOpposite());
+                    levelData.structures.RemoveAt(i);
+                }
+            }
+            for (int i = levelData.tileBasedObjects.Count - 1; i >= 0; i--)
+            {
+                var tileObject = levelData.tileBasedObjects[i];
+                if (tileObject.type == "traffictrouble_placement")
+                {
+                    CreateTunnelRoom(tileObject.position + tileObject.direction.ToIntVector2(), tileObject.direction.GetOpposite());
+                    levelData.tileBasedObjects.RemoveAt(i);
                 }
             }
         });
@@ -94,9 +131,10 @@ internal static class StudioAdds
                 EditorInterfaceModes.AddToolsToCategory(mode, "items", [new ItemTool("ufospikedball", false), new ItemTool("ufospikedballstacked", false)]);
                 EditorInterfaceModes.AddToolsToCategory(mode, "structures", [
                     new GnatSwarmHousingPlacement("gnatswarm_placement", ABWEventsPlugin.assets.Get<Sprite>("gnatswarm_placement")),
-                    new TrafficTroubleTunnelTool("traffictrouble_placement", ABWEventsPlugin.assets.Get<Sprite>("traffictrouble_placement")),
                     new GnatSwarmHousingPlacement("nightmares_placement", ABWEventsPlugin.assets.Get<Sprite>("nightmares_placement")),
                     ]);
+                EditorInterfaceModes.AddToolToCategory(mode, "doors", new DoorTool("traffictrouble_placement", ABWEventsPlugin.assets.Get<Sprite>("traffictrouble_placement")));
+                EditorInterfaceModes.AddToolToCategory(mode, "rooms", new RoomTool("traffictrouble_room", ABWEventsPlugin.assets.Get<Sprite>("traffictrouble_placement")));
                 mode.pages.AddRange([
             new EditorGlobalPage()
             {
@@ -194,7 +232,7 @@ internal class GnatSwarmHousingPlacement : PointTool // Workaround: tile based o
         return true;
     }
 }
-
+[Obsolete("Replaced by the new system introducted in v0.14.3", true)]
 internal class TrafficTroubleTunnelTool : TileBasedObjectTool // Workaround: Is a poster but can only be placed if the behind cell is not an existing cell.
 {
     public override string id => type;

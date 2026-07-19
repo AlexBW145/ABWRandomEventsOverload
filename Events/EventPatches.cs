@@ -18,20 +18,18 @@ class EventPatches
     static void TempOpenTraffic(Navigator __instance)
     {
         if (__instance.passableObstacles.Contains(ABWEventsPlugin.trafficPath))
-        {
-            if (TrafficTroubleEvent.Instance != null)
-                TrafficTroubleEvent.Instance.TempOpen();
-        }
+            TrafficTroubleEvent.tempOpenRoads();
+        if (__instance.passableObstacles.Contains(ABWEventsPlugin.trafficTunnelObstacle))
+            TrafficTroubleEvent.tempOpenTunnels();
     }
 
     [HarmonyPatch(typeof(Navigator), "TempCloseObstacles"), HarmonyPostfix]
     static void TempCloseTraffic(Navigator __instance)
     {
         if (__instance.passableObstacles.Contains(ABWEventsPlugin.trafficPath))
-        {
-            if (TrafficTroubleEvent.Instance != null)
-                TrafficTroubleEvent.Instance.TempClose();
-        }
+            TrafficTroubleEvent.tempCloseRoads();
+        if (__instance.passableObstacles.Contains(ABWEventsPlugin.trafficTunnelObstacle))
+            TrafficTroubleEvent.tempCloseTunnels();
     }
 
     [HarmonyPatch(typeof(PartyEvent), nameof(PartyEvent.Begin)), HarmonyPostfix] // I cannot deal with Students bugging the party event.
@@ -45,7 +43,7 @@ class EventPatches
         x?.npc is TokenOutrunGuy ||
         x?.npc is UFOEntity ||
         x?.npc is Balder_Entity ||
-        x?.npc is Crowd_Entity ||
+        x?.npc is StudentCrowd_Leader ||
         x?.npc is Student ||
         x?.npc?.Character == Character.Null ||
         x?.npc == null))
@@ -61,7 +59,7 @@ class EventPatches
         x?.npc is TokenOutrunGuy ||
         x?.npc is UFOEntity ||
         x?.npc is Balder_Entity ||
-        x?.npc is Crowd_Entity ||
+        x?.npc is StudentCrowd_Leader ||
         x?.npc is Student ||
         x?.npc?.Character == Character.Null ||
         x?.npc == null);
@@ -90,7 +88,7 @@ class EventPatches
         x?.npc is TokenOutrunGuy ||
         x?.npc is UFOEntity ||
         x?.npc is Balder_Entity ||
-        x?.npc is Crowd_Entity ||
+        x?.npc is StudentCrowd_Leader ||
         x?.npc is Student ||
         x?.npc?.Character == Character.Null ||
         x?.npc == null))
@@ -106,7 +104,7 @@ class EventPatches
         x?.npc is TokenOutrunGuy ||
         x?.npc is UFOEntity ||
         x?.npc is Balder_Entity ||
-        x?.npc is Crowd_Entity ||
+        x?.npc is StudentCrowd_Leader ||
         x?.npc is Student ||
         x?.npc?.Character == Character.Null ||
         x?.npc == null);
